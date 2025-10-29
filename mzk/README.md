@@ -1,16 +1,18 @@
-# PicoCalc-MMBasic-Programs-from-the-geeks
-MZK.BAS - playing MuZiK on the PicoCalc
+# [MZK.BAS](https://github.com/wereallgeek/PicoCalc-MMBasic-Programs-from-the-geeks/blob/main/mzk/mzk.bas) - playing MuZiK on the PicoCalc
+
+## tinkering with MMBasic and programs
 
 Playing music on your calculator is very geeky. PicoCalc is not any calculator, it is a raspberry pi pico.
 And it can play music. MP3 on this project.
 
 This project is what happens when you have too much time on your hands, and see a cool idea, and try something, and mashup something else, and test, and tinker, and end up with something else.
 
-At its base, there is the matrix animation software by VanzT. This is not really a fork as the program really just mashes it up with another program...
-There is a thread on the PicoCalc section of Clockwork pi forums about Building your own mp3 player in MMBasic.
+At its base, there is the [matrix animation](https://github.com/VanzT/PicoCalc-Toys/blob/master/matrix.bas) software by [VanzT](https://github.com/VanzT). This is not really a fork of his [PicoCalc-Toys](https://github.com/VanzT/PicoCalc-Toys) as the program really just mashes it up with another program...
+There is a thread on the PicoCalc section of [Clockwork pi forums](https://forum.clockworkpi.com/) about [Building your own mp3 player](https://forum.clockworkpi.com/t/building-my-own-mp3-player-in-mmbasic/) in MMBasic, with interesting (and functionning) code from [Dominikus_Koch](https://forum.clockworkpi.com/u/dominikus_koch/summary) for a basic MP3 player.
+This is a nice headstart into making some MP3 music playing software!
 
 What happens if you join the MP3 player with the Matrix animation? You get a Matrix MP3 player.
-Add some options like displaying a cover.bmp seen in the forum thread. Add the ability to display a cover with the same name as the mp3. Make the matrix/cover art selectable. and what do you get?
+There was already the ability to display one cover art image... Add the ability to display a cover with the same name as the mp3. Make the matrix/cover art selectable. and what do you get?
 
 I don't know but it is very geeky...
 
