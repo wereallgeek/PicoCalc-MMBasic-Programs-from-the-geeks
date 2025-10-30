@@ -11,6 +11,8 @@ mpsec = 0
 mpmin = 0
 mptime$ = Time$
 setupfile$ = "mzk.ini"
+bat = MM.Info(battery)
+isplug = MM.Info(charging)
 
 ' Screen constants
 Const WIDTH = 320
@@ -122,14 +124,28 @@ Sub writeshuffle
  writesetup
 End Sub
 
+' load battery state
+'--------------------
+' constantly poking stm32 cause
+' audible glitch. but adjust every
+' songchange is good ennough info.
+Sub checkbat
+ bat = MM.Info(battery)
+ isplug = MM.Info(charging)
+End Sub
 
 ' Initialize matrix
 CLS
 Font 1
 Randomize Timer
-ledEnabled = 0   ' start with LEDs active
+ledEnabled = 0 ' start with LEDs active
 
 Do While mpquit = 0
+  On error skip 1
+    Play mp3 mp3$(mpx), nextsong
+  On error abort
+
+
   ' 0) Check for toggle key (L)
   k$ = Inkey$
   If k$ = "l" Then
@@ -293,7 +309,10 @@ Do While mpquit = 0
    mpcover = 0
   'mp3 handling
   ElseIf mpx = mpf1 Or mpx = 0 Then
-   mpx = 1 'rollover
+    mpx = 1 'rollover
+    If shuffle$ = "true" Then
+      doshuffle
+    EndIf
   EndIf
   'dispay information
   ind$ = "--"
@@ -317,9 +336,16 @@ Do While mpquit = 0
   EndIf
 
   Print @(0,0) ind$ + min$ + sec$ + mpname$
-  On error skip 1
-  Play mp3 mp3$(mpx), nextsong
-  On error abort
+
+  Print @(300,0) " %"
+  Print @(275,0) bat
+
+  If isplug = 1 Then
+    Print @(275,0) "+"
+  ElseIf mpdmode$ <> "matrix" Then
+    Print @(275,0) " "
+  EndIf
+
 
   'mp3 key control
   mpk$ = Inkey$
@@ -329,15 +355,20 @@ Do While mpquit = 0
     mpx = mpx + 1
     mpcover = 0
     mpnext = 0
+    checkbat
     mptime$ = Time$
    Case 130: Play stop
     If (mpx > 2) Then
       mpx = mpx - 1
     Else
       mpx = mpf1 - 1 'rollover
+      If shuffle$ = "true" Then
+        doshuffle
+      EndIf
     EndIf
     mpcover = 0
     mpnext = 0
+    checkbat
     mptime$ = Time$
    Case 27: Play stop
     mpquit = 1
@@ -352,17 +383,19 @@ Do While mpquit = 0
     EndIf
     mpdmode$ = "cover"
     writesetup
-   Case 49
+   Case 9
     mpx = 0
     writeshuffle
+    checkbat
    End Select
   End If
 
   If mpnext = 1 Then
    Play stop
    mpx = mpx + 1
-   newcover = 1
+   mpcover = 0
    mpnext = 0
+   checkbat
    mptime$ = Time$
   EndIf
   '/mp3
@@ -380,5 +413,5 @@ Do While mpquit = 0
   EndIf
   mpmin = tmmin - mymin
   mpsec = tmsec - mysec
-  Pause (10)
+
 Loop
