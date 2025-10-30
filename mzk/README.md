@@ -20,16 +20,16 @@ What happens if you join the MP3 player with the Matrix animation? You get a Mat
 
 There was already the ability to display one cover art image... Add the ability to display a cover with the same name as the mp3. Make the matrix/cover art selectable. and what do you get?
 
-I don't know but it is very geeky...
+I don't know. But it is very geeky...
 
 
 
 ## disclaimer
-this is a very crude software coded directly on the PicoCalc without cut n' paste and it includes two different programs in different coding standards. The result is very crude.
+this is a very crude software coded directly on the PicoCalc which is initially based on two different programs in different coding standards. The result is very crude.
 
 Use at your own risk.
 
-but have fun.
+But have fun.
 
 
 
@@ -56,7 +56,7 @@ F1 setup for MATRIX animation
 
 F2 setup for COVER image
 
-1 Toggle Shuffle mode
+TAB Toggle Shuffle mode
 
 ESC exit
 
