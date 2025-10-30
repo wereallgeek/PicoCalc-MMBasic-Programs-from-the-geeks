@@ -22,12 +22,16 @@ There was already the ability to display one cover art image... Add the ability 
 
 I don't know but it is very geeky...
 
+
+
 ## disclaimer
 this is a very crude software coded directly on the PicoCalc without cut n' paste and it includes two different programs in different coding standards. The result is very crude.
 
 Use at your own risk.
 
 but have fun.
+
+
 
 ## instructions
 put the MP3s in a folder b:/mp3/ on the PicoCalc SD card. (or change the folder in the .bas file)
@@ -38,12 +42,21 @@ Add up to 99 MP3 files
 Each MP3 can had its own 320x320 (or less) image with the same name (extension: bmp) to display
 run "mzk" 
 
+### display
+The top line is an information line that shows the filename and elapsed time.
+
+First character is S for shuffle, - otherwise
+
+
+
 ### KEYS
 Left/right previous & next song
 
 F1 setup for MATRIX animation
 
 F2 setup for COVER image
+
+1 Toggle Shuffle mode
 
 ESC exit
 
