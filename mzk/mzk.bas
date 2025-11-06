@@ -152,6 +152,7 @@ Do While mpquit = 0
     On error skip 1
       Play modfile mzk$(mpx), nextsong
     On error abort
+    checkbat()
   EndIf
 
   ' 0) Check for toggle key (L)
