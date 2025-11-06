@@ -46,9 +46,9 @@ run "mzk"
 
 In PicoMite, run these commands
 
-####OPTION CPUSPEED 200000
+#### OPTION CPUSPEED 200000
   -- this will overclock the pi and reboot
-####OPTION MODBUFF ENABLE 192
+#### OPTION MODBUFF ENABLE 192
   -- this will enable modfile buffering on the A: drive. This process will reformat the A: drive so be sure to backup anything valuable.
 
 ### display
