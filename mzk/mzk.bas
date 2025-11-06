@@ -10,7 +10,6 @@ mpnext = 0
 mpsec = 0
 mpmin = 0
 mptime$ = Time$
-setupfile$ = "mzk.ini"
 bat = MM.Info(battery)
 isplug = MM.Info(charging)
 
@@ -46,18 +45,21 @@ Next i
 
 'music
 mpx=1
-Dim mp3$(100)
-path$="b:\mp3\"
+Dim mzk$(127)
+path$="b:\mzk\"
+mp3ext$ = "mp3"
+modext$ = "mod"
+setupfile$ = "mzk.ini"
 mpquit = 0
 mpnext = 0
 mppathlen = Len(path$)
 
 'music folder init
 mpf1=1
-mpf$=Dir$(path$ + "*.mp3", FILE)
+mpf$=Dir$(path$ + "*.m*", FILE) 'mp3+mod
 
 Do While mpf$<>""
- mp3$(mpf1)=path$+mpf$
+ mzk$(mpf1)=path$+mpf$
  mpf$=Dir$()
  mpf1=mpf1+1
 Loop
@@ -77,19 +79,19 @@ EndIf
 Sub doshuffle
  Randomize
  For mpi=1 To mpf1 - 1
-  mpk$ = mp3$(mpi)
+  mpk$ = mzk$(mpi)
   mpj = Int(Rnd*(mpf1 - 1)) + 1
-  mp3$(mpi) = mp3$(mpj)
-  mp3$(mpj) = mpk$
+  mzk$(mpi) = mzk$(mpj)
+  mzk$(mpj) = mpk$
  Next
 End Sub
 
 'set ordered play
 Sub unshuffle
  mpf1=1
- mpf$=Dir$(path$ + "*.mp3",FILE)
+ mpf$=Dir$(path$ + "*.m*",FILE)
  Do While mpf$<>""
-  mp3$(mpf1)=path$+mpf$
+  mzk$(mpf1)=path$+mpf$
   mpf$=Dir$()
   mpf1=mpf1+1
  Loop
@@ -141,10 +143,16 @@ Randomize Timer
 ledEnabled = 0 ' start with LEDs active
 
 Do While mpquit = 0
-  On error skip 1
-    Play mp3 mp3$(mpx), nextsong
-  On error abort
-
+  curext$ = Right$(mzk$(mpx), 3)
+  If curext$ = mp3ext$ Then
+    On error skip 1
+      Play mp3 mzk$(mpx), nextsong
+    On error abort
+  ElseIf curext$ = modext$ Then
+    On error skip 1
+      Play modfile mzk$(mpx), nextsong
+    On error abort
+  EndIf
 
   ' 0) Check for toggle key (L)
   k$ = Inkey$
@@ -272,11 +280,11 @@ Do While mpquit = 0
    If mpcover = 0 Then
     CLS
     'displey cover
-    mpnamelen = Len(mp3$(mpx)) - 4
+    mpnamelen = Len(mzk$(mpx)) - 4
     If mpnamelen > 0 Then
-     covername$ = Left$(mp3$(mpx), mpnamelen) + ".bmp"
+     covername$ = Left$(mzk$(mpx), mpnamelen) + ".bmp"
     Else
-     covername$ = mp3$(mpx)
+     covername$ = mzk$(mpx)
     EndIf
     'try it
     On error skip 3
@@ -318,8 +326,8 @@ Do While mpquit = 0
   ind$ = "--"
   min$ = Str$(mpmin)
   sec$ = ":" + Str$(mpsec) + "-"
-  mpnamelen = (Len(mp3$(mpx))-mppathlen)-4
-  mpname$ = Mid$(mp3$(mpx), mppathlen + 1, mpnamelen)
+  mpnamelen = (Len(mzk$(mpx))-mppathlen)-4
+  mpname$ = Mid$(mzk$(mpx), mppathlen + 1, mpnamelen)
   If shuffle$ = "true" Then
    ind$ = "S-"
   EndIf
