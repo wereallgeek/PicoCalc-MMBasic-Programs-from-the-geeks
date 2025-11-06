@@ -3,7 +3,7 @@
 ## tinkering with MMBasic and programs
 
 Playing music on your calculator is very geeky. PicoCalc is not any calculator, it is a raspberry pi pico.
-And it can play music. MP3 on this project.
+And it can play music. MP3 and MOD files on this project.
 
 
 This project is what happens when you have too much time on your hands, and see a cool idea, and try something, and mashup something else, and test, and tinker, and end up with something else.
@@ -13,12 +13,12 @@ At its base, there is the [matrix animation](https://github.com/VanzT/PicoCalc-T
 
 There is a thread on the PicoCalc section of [Clockwork pi forums](https://forum.clockworkpi.com/) about [Building your own mp3 player](https://forum.clockworkpi.com/t/building-my-own-mp3-player-in-mmbasic/) in MMBasic, with interesting (and functionning) code from [Dominikus_Koch](https://forum.clockworkpi.com/u/dominikus_koch/summary) for a basic MP3 player.
 
-This is a nice headstart into making some MP3 music playing software!
+This is a nice headstart into making some music playing software!
 
 
-What happens if you join the MP3 player with the Matrix animation? You get a Matrix MP3 player.
+What happens if you join the MP3 player with the Matrix animation? You get a Matrix MP3 player. What if next you add Modfile compatibility??
 
-There was already the ability to display one cover art image... Add the ability to display a cover with the same name as the mp3. Make the matrix/cover art selectable. and what do you get?
+There was already the ability to display one cover art image... Add the ability to display a cover with the same name as the audiofile (mp3 or mod). Make the matrix/cover art selectable. and what do you get?
 
 I don't know. But it is very geeky...
 
@@ -34,13 +34,22 @@ But have fun.
 
 
 ## instructions
-put the MP3s in a folder b:/mp3/ on the PicoCalc SD card. (or change the folder in the .bas file)
+put the MP3s, MODs and cover BMPs in a folder b:/mzk/ on the PicoCalc SD card. (or change the folder in the .bas file)
 
-The supplied /mp3/cover.bmp 320x320 image can be use as a default image or can be changed to your need
-Add up to 99 MP3 files
+The supplied /mzk/cover.bmp 320x320 image can be use as a default image or can be changed to your need
+Add up to 127 audio files of the MP3 and MOD variety.
+MP3s may need to be converted as not everybitrates seems compatible with the pi pico
+MOD files are to be lower than 192k
 
-Each MP3 can had its own 320x320 (or less) image with the same name (extension: bmp) to display
+Each audio file can have its own 320x320 (or less) image with the same name (extension: bmp) to display
 run "mzk" 
+
+In PicoMite, run these commands
+
+OPTION CPUSPEED 200000
+  -- this will overclock the pi and reboot
+OPTION MODBUFF ENABLE 192
+  -- this will enable modfile buffering on the A: drive. This process will reformat the A: drive so be sure to backup anything valuable.
 
 ### display
 The top line is an information line that shows the filename and elapsed time.
