@@ -31,8 +31,7 @@ Use at your own risk.
 
 But have fun.
 
-<img src="https://github.com/wereallgeek/PicoCalc-MMBasic-Programs-from-the-geeks/blob/main/mzk/assets/MZKalbum.jpg?raw=true" width="200"/>
-<img src="https://github.com/wereallgeek/PicoCalc-MMBasic-Programs-from-the-geeks/blob/main/mzk/assets/MZKmatrix.jpg?raw=true" width="200"/>
+<img src="https://github.com/wereallgeek/PicoCalc-MMBasic-Programs-from-the-geeks/blob/main/mzk/assets/MZKalbum.jpg?raw=true" width="300"/> <img src="https://github.com/wereallgeek/PicoCalc-MMBasic-Programs-from-the-geeks/blob/main/mzk/assets/MZKmatrix.jpg?raw=true" width="300"/>
 
 
 ## instructions
