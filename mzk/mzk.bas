@@ -1,6 +1,6 @@
 ' Matrix Rain +
 ' 8-LED WS2812 Sync with LED On/Off Toggle  PicoMite MMBasic
-' plus basic mp3 player
+' plus mp3 and modfile player
 
 ' Mode Selectiom and nav variables
 mpdmode$ = "matrix"
@@ -114,7 +114,7 @@ End Sub
 Sub writeshuffle
  If shuffle$ = "true" Then
   Color RGB(myrtle)
-  Print @(0,0) "--"
+  Print @(0,0) " -"
   shuffle$= "false"
   unshuffle
  Else
@@ -126,15 +126,83 @@ Sub writeshuffle
  writesetup
 End Sub
 
-' load battery state
+' get battery state
 '--------------------
 ' constantly poking stm32 cause
-' audible glitch. but adjust every
+' mp3 audible glitch. but adjust every
 ' songchange is good ennough info.
 Sub checkbat
  bat = MM.Info(battery)
  isplug = MM.Info(charging)
 End Sub
+
+Function tracktime$()
+  min$ = Str$(mpmin)
+  sec$ = ":" + Str$(mpsec) + "-"
+  If mpmin < 10 Then
+   min$ = "0" + Str$(mpmin)
+  EndIf
+  If mpsec < 10 Then
+   sec$ = ":0" + Str$(mpsec) + "-"
+  EndIf
+  tracktime$ = min$ + sec$
+End Function
+
+Function trackname$()
+  mpnamelen = (Len(mzk$(mpx))-mppathlen)-4
+  trackname$ = Mid$(mzk$(mpx), mppathlen + 1, mpnamelen)
+End Function
+
+Sub noinfo
+  msg$="-LOAD-"
+  If mpquit = 1 Then
+    msg$="       "
+  EndIf
+  If mpdmode$ = "matrix" Then
+    displayinfo("", msg$)
+  Else
+    displayinfo("                             ", msg$)
+  EndIf
+End Sub
+
+Sub trackinfo
+  displayinfo(trackname$(), "------")
+End Sub
+
+
+' Print information line
+Sub displayinfo(namein$ As string, timein$ As string)
+  'dispay information
+  ind$ = " -"
+
+  infotrack$ = timein$ + namein$
+
+  If shuffle$ = "true" Then
+   ind$ = "S-"
+  EndIf
+  If mpquit = 1 Then
+    ind$ = "  "
+  EndIf
+  If mpquit = 1 Then
+    Color RGB(green)
+  ElseIf mpdmode$ = "matrix" Then
+    Color RGB(myrtle)
+  Else
+    Color RGB(white)
+  EndIf
+
+  Print @(0,0) ind$ + infotrack$
+
+  Print @(300,0) " %"
+  Print @(275,0) bat
+
+  If isplug = 1 Then
+    Print @(275,0) "+"
+  ElseIf mpdmode$ <> "matrix" Then
+    Print @(275,0) " "
+  EndIf
+End Sub
+
 
 ' Initialize matrix
 CLS
@@ -280,6 +348,7 @@ Do While mpquit = 0
   If mpdmode$ = "cover" Then
    If mpcover = 0 Then
     CLS
+    trackinfo
     'displey cover
     mpnamelen = Len(mzk$(mpx)) - 4
     If mpnamelen > 0 Then
@@ -323,38 +392,8 @@ Do While mpquit = 0
       doshuffle
     EndIf
   EndIf
-  'dispay information
-  ind$ = "--"
-  min$ = Str$(mpmin)
-  sec$ = ":" + Str$(mpsec) + "-"
-  mpnamelen = (Len(mzk$(mpx))-mppathlen)-4
-  mpname$ = Mid$(mzk$(mpx), mppathlen + 1, mpnamelen)
-  If shuffle$ = "true" Then
-   ind$ = "S-"
-  EndIf
-  If mpmin < 10 Then
-   min$ = "0" + Str$(mpmin)
-  EndIf
-  If mpsec < 10 Then
-   sec$ = ":0" + Str$(mpsec) + "-"
-  EndIf
-  If mpdmode$ = "matrix" Then
-   Color RGB(myrtle)
-  Else
-   Color RGB(white)
-  EndIf
 
-  Print @(0,0) ind$ + min$ + sec$ + mpname$
-
-  Print @(300,0) " %"
-  Print @(275,0) bat
-
-  If isplug = 1 Then
-    Print @(275,0) "+"
-  ElseIf mpdmode$ <> "matrix" Then
-    Print @(275,0) " "
-  EndIf
-
+  displayinfo(trackname$(), tracktime$())
 
   'mp3 key control
   mpk$ = Inkey$
@@ -366,6 +405,7 @@ Do While mpquit = 0
     mpnext = 0
     checkbat
     mptime$ = Time$
+    noinfo
    Case 130: Play stop
     If (mpx > 2) Then
       mpx = mpx - 1
@@ -379,6 +419,7 @@ Do While mpquit = 0
     mpnext = 0
     checkbat
     mptime$ = Time$
+    noinfo
    Case 27: Play stop
     mpquit = 1
     CLS
@@ -406,6 +447,7 @@ Do While mpquit = 0
    mpnext = 0
    checkbat
    mptime$ = Time$
+   noinfo
   EndIf
   '/mp3
 
