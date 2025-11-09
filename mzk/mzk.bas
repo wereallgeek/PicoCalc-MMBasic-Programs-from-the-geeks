@@ -126,6 +126,39 @@ Sub writeshuffle
  writesetup
 End Sub
 
+' time computation
+Sub counttime
+  myhrs = Val(Mid$(mptime$,1,2))
+  tmhrs = Val(Mid$(Time$,1,2))
+  mymin = Val(Mid$(mptime$,4,2))
+  tmmin = Val(Mid$(Time$,4,2))
+  mysec = Val(Mid$(mptime$,7,2))
+  tmsec = Val(Mid$(Time$,7,2))
+  If tmsec < mysec Then
+    tmsec = tmsec + 60
+    If tmmin = 0 Then
+      tmmin = 59
+    Else
+      tmmin = tmmin - 1
+    EndIf
+  EndIf
+  If tmmin < mymin Then
+    tmmin = tmmin + 60
+    If tmhrs = 1 Then
+      tmhrs = 12
+    Else
+      tmhrs = tmhrs - 1
+    EndIf
+  EndIf
+  If tmhrs < myhrs Then
+    tmhrs = tmhrs + 12
+  EndIf
+  mphrs = tmhrs - myhrs
+  mpmin = tmmin - mymin + (mphrs * 60)
+  mpsec = tmsec - mysec
+End Sub
+
+
 ' get battery state
 '--------------------
 ' constantly poking stm32 cause
@@ -139,11 +172,14 @@ End Sub
 Function tracktime$()
   min$ = Str$(mpmin)
   sec$ = ":" + Str$(mpsec) + "-"
+  If mpmin < 100 Then
+    min$ = "-" + Str$(mpmin)
+  EndIf
   If mpmin < 10 Then
-   min$ = "0" + Str$(mpmin)
+    min$ = "-0" + Str$(mpmin)
   EndIf
   If mpsec < 10 Then
-   sec$ = ":0" + Str$(mpsec) + "-"
+    sec$ = ":0" + Str$(mpsec) + "-"
   EndIf
   tracktime$ = min$ + sec$
 End Function
@@ -449,20 +485,9 @@ Do While mpquit = 0
    mptime$ = Time$
    noinfo
   EndIf
-  '/mp3
+  ' /mp3
 
-  'time computation
-  mymin = Val(Mid$(mptime$,4,2))
-  tmmin = Val(Mid$(Time$,4,2))
-  mysec = Val(Mid$(mptime$,7,2))
-  tmsec = Val(Mid$(Time$,7,2))
-  If tmmin < mymin Then
-   tmmin = tmmin + 60
-  EndIf
-  If tmsec < mysec Then
-   tmsec = tmsec + 60
-  EndIf
-  mpmin = tmmin - mymin
-  mpsec = tmsec - mysec
+  ' time computation
+  counttime
 
 Loop
