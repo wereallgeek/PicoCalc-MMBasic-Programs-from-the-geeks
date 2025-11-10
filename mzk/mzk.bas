@@ -393,8 +393,8 @@ Do While mpquit = 0
      covername$ = mzk$(mpx)
     EndIf
     'is there a cover?
-    coverlen = MM.Info(filesize covername$)
-    If coverlen = 0 Then
+    hascover = MM.Info(exists file covername$)
+    If hascover = 0 Then
      'no cover, use default
      covername$ = path$ + "cover.bmp"
     EndIf
