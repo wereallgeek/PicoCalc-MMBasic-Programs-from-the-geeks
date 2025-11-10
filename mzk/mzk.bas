@@ -392,17 +392,9 @@ Do While mpquit = 0
     Else
      covername$ = mzk$(mpx)
     EndIf
-    'try it
-    On error skip 3
-     Open (covername$) For random As #3
-     coverlen = Lof(3)
-     Close #3
-    On error abort
+    'is there a cover?
+    coverlen = MM.Info(filesize covername$)
     If coverlen = 0 Then
-     'clean
-     On error skip 1
-      Kill (covername$)'0bytes removal
-     On error abort
      'no cover, use default
      covername$ = path$ + "cover.bmp"
     EndIf
