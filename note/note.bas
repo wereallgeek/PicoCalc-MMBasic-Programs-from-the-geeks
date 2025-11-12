@@ -8,12 +8,24 @@ notenum = 1
 
 'draw header
 Sub noteheader(whatnote As integer)
-  Print @(0,0) whatnote
+  If hasnote(whatnote) = 1 Then
+    Print @(0,0) whatnote
+  Else
+    Print @(0,0) " -"
+  EndIf
 End Sub
 
 'draw footer
 Sub notefooter(whatnote As integer)
-  Print @(0,295) "<- " + Str$(whatnote) + " -> move, [A]dd, [D]elete, [Q]uit"
+  footxt$ = "<-"
+  footxt$ = footxt$ + Str$(whatnote)
+  footxt$ = footxt$ + "->"
+  footxt$ = footxt$ + " [A]dto"
+  footxt$ = footxt$ + " [D]el"
+  footxt$ = footxt$ + " [I]ns"
+  footxt$ = footxt$ + " [N]ew"
+  footxt$ = footxt$ + " [Q]uit"
+  Print @(0,295) footxt$
 End Sub
 
 'compute mote filename
@@ -26,16 +38,32 @@ Function hasnote(whatnote As integer)
   hasnote = MM.Info(exists file notefile$(whatnote))
 End Function
 
-'save new note
-Sub addnote(notetoadd$ As string)
-  Do While hasnote(notenum) = 1
-    notenum = notenum + 1
+'find next available spot
+Function nextNoteSpot(whatnote As integer)
+  nextNoteSpot = whatnote
+  Do While hasnote(nextNoteSpot) = 1
+    nextNoteSpot = nextNoteSpot + 1
   Loop
-  'save the new note to the file
+End Function
+
+'save the new note to the file
+Sub writeNote(notetoadd$ As string)
   Open notefile$(notenum) For append As filehandle
   Print #filehandle, notetoadd$
   Close #filehandle
   loadnotes(notenum)
+End Sub
+
+'add new note at the end
+Sub addnote(notetoadd$ As string)
+  notenum = nextNoteSpot(notenum)
+  writeNote(notetoadd$)
+End Sub
+
+'move notes to add one here
+Sub insertNoteHere(notetoadd$ As string)
+  addNoteSpotAt(notenum)
+  writeNote(notetoadd$)
 End Sub
 
 'get note from disk
@@ -54,7 +82,22 @@ Sub loadnotes(whatnote As integer)
   notefooter(whatnote)
 End Sub
 
-'change note
+'change displayed note
+Sub first
+  notenum = 1
+  loadnotes(notenum)
+End Sub
+
+'change displayed note
+Sub last
+  notenum = nextNoteSpot(notenum)
+  If notenum > 1 Then
+    notenum = notenum - 1
+  EndIf
+  loadnotes(notenum)
+End Sub
+
+'change displayed note
 Sub right
   'only go right if not on empty note
   If hasnote(notenum) = 1 Then
@@ -63,7 +106,7 @@ Sub right
   loadnotes(notenum)
 End Sub
 
-'change note
+'change displayed note
 Sub left
   If notenum > 1 Then
     notenum = notenum - 1
@@ -71,11 +114,36 @@ Sub left
   loadnotes(notenum)
 End Sub
 
+'get data t store
+Function getNote$()
+  CLS
+  Print "text to note"
+  Line Input getNote$
+End Function
+
 'add new note
 Sub newnote
-  Print "enter a note"
-  Line Input note$
-  addnote(note$)
+  addnote(getNote$())
+End Sub
+
+'add note at curent location
+Sub insertNote
+  insertNoteHere(getNote$())
+End Sub
+
+'add to existing note
+Sub addtonote
+  writeNote(getNote$())
+End Sub
+
+'move file right
+Sub addNoteSpotAt(dst As integer)
+  nxt = nextNoteSpot(dst)
+  Do While nxt > dst
+    cur = nxt - 1
+    Rename notefile$(cur) As notefile$(nxt)
+    nxt = nxt - 1
+  Loop
 End Sub
 
 'move file left
@@ -104,20 +172,27 @@ Sub deletenote(notenum As integer)
   EndIf
 End Sub
 
-
 'begin here
 loadnotes(notenum)
 Do
   cmd$ = Inkey$
   If cmd$ <> "" Then
     Select Case Asc(cmd$)
-      Case 97 '[a]dd
+      Case 97 '[a]dd to note
+        addtonote
+      Case 105 '[i]nsert
+        insertnote
+      Case 110 '[n]ew
         newnote
       Case 100 '[d]elete
         deletenote(notenum)
-      Case 131
+      Case 128 'up
+        first
+      Case 129 'down
+        last
+      Case 131 'right
         right
-      Case 130
+      Case 130 'left
         left
       Case 114 '[r]eload
         loadnotes(notenum)
@@ -128,5 +203,5 @@ Do
     End Select
   EndIf
 Loop
-
+CLS
 End
