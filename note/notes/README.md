@@ -25,7 +25,11 @@ The program would store each note (numbered) as a file with .data extension in t
 ### KEYS
 Left/right previous & next note
 
-A to add a note. It will be added at the end of current notes
+A to add to a note. 
+
+N for new note - It will be added at the end of current notes
+
+I for insert note - like new note but at current location
 
 D to delete current note. It will domino the files back to remove the "hole"
 
