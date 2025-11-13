@@ -23,7 +23,7 @@ The program would store each note (numbered) as a file with .data extension in t
 
 
 ### KEYS
-Left/right previous & next note
+Left/right/home/end  navigate notes
 
 A to add to a note. 
 
@@ -31,8 +31,8 @@ N for new note - It will be added at the end of current notes
 
 I for insert note - like new note but at current location
 
-D to delete current note. It will domino the files back to remove the "hole"
+Backspace - to delete current note. It will domino the files back to remove the "hole"
 
-Q or ESC to exit
+ESC to exit
 
 R to reload
