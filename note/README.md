@@ -19,7 +19,8 @@ But have fun.
 The path to files is within the BAS, but currently points to b:\notes\
 I have put a notes folder in this GIT as an example.
 
-The program would store each note (numbered) as a file with .data extension in this folder. It is plain text
+The program would store each note (numbered) as a file with .data extension in a notebook (collection) subfolder. It is plain text.
+Each subfolder (notebook) will have a .info file for data storage.
 
 
 ### KEYS

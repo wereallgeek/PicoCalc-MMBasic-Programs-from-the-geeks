@@ -2,10 +2,12 @@
 filehandle = 1
 filename$ = "notes.data"
 path$ = "b:\notes\"
+bookinfoext$ = ".inf"
 dataext$ = ".data"
 note$ = ""
 notenum = 1
 notebook$ = "notebook"
+booknum = 1
 
 'draw header
 Sub noteheader(whatnote As integer)
@@ -31,6 +33,7 @@ Sub notefooter(whatnote As integer)
   Print @(0,295) footxt$
 End Sub
 
+'ask to delete note
 Sub askDelete
   CLS
   loadnotetext(notenum)
@@ -46,9 +49,34 @@ Sub askDelete
   EndIf
 End Sub
 
-'compute mote filename
+'compute book foldername
+Function bookfolder$(whatbook As integer)
+  bookfolder$ = path$ + Str$(whatbook)
+End Function
+
+'compute book info filename
+Function bookinfo$(whatbook As integer)
+  bookinfo$ = path$ + Str$(whatbook) + bookinfoext$
+End Function
+
+'compute note filename
 Function notefile$(whatnote As integer)
-  notefile$ = path$ + Str$(whatnote) + dataext$
+  filename$ = path$
+  filename$ = filename$ + Str$(booknum)
+  filename$ = filename$ + "\"
+  filename$ = filename$ + Str$(whatnote)
+  filename$ = filename$ + dataext$
+  notefile$ = filename$
+End Function
+
+'check if book exist
+Function hasbook(whatbook As integer)
+  hasbook = MM.Info(exists dir bookfolder$(whatbook))
+End Function
+
+'check if bookinfo exist
+Function hasbookinfo(whatbook As integer)
+  hasbookinfo = MM.Info(exists file bookinfo$(whatbook))
 End Function
 
 'check if note exist
@@ -63,6 +91,13 @@ Function nextNoteSpot(whatnote As integer)
     nextNoteSpot = nextNoteSpot + 1
   Loop
 End Function
+
+'save book info
+Sub writeBookinfo(infotoadd$ As string)
+  Open bookinfo$(booknum) For output As filehandle
+  Print #filehandle, infotoadd$
+  Close #filehandle
+End Sub
 
 'save the new note to the file
 Sub writeNote(notetoadd$ As string)
@@ -84,6 +119,41 @@ Sub insertNoteHere(notetoadd$ As string)
   addNoteSpotAt(notenum)
   CLS
   writeNote(notetoadd$)
+End Sub
+
+'create book
+Sub createbook(whatbook As integer)
+  If hasbook(whatbook) = 1 Then
+    loadbook(whatbook)
+  Else
+    If hasbookinfo(whatbook) = 0 Then
+      notebook$ = getBookname$()
+      booknum = whatbook
+      writeBookinfo(notebook$)
+    Else
+      notebook$ = loadbookinfo$(whatbook)
+    EndIf
+    newbook(whatbook)
+  EndIf
+End Sub
+
+'load bookinfo
+Function loadbookinfo$(whatbook As integer)
+  loadbookinfo$ = notebook$
+  If hasbookinfo(whatbook) = 1 Then
+    ' load existing info from file
+    Open bookinfo$(whatbook) For INPUT As filehandle
+    Line Input #filehandle, loadbookinfo$
+    Close #filehandle
+  EndIf
+End Function
+
+'load book
+Sub loadbook(whatbook As integer)
+  If hasbook(whatbook) = 1 Then
+    booknum = whatbook
+    notebook$ = loadbookinfo$(whatbook)
+  EndIf
 End Sub
 
 'load and display the note
@@ -139,11 +209,29 @@ Sub left
   loadnotes(notenum)
 End Sub
 
-'get data t store
+'get book name
+Function getBookname$()
+  Print "Naame of the notebook"
+  Line Input bookname$
+  titlen = Len(bookname$)
+  If titlen > 20 Then
+    titlen = 20
+  EndIf
+  getBookname$ = Left$(bookname$, titlen)
+End Function
+
+'get data to store
 Function getNote$()
   Print "text to note"
   Line Input getNote$
 End Function
+
+'create book folder
+Sub newbook(whatbook As integer)
+  If hasbook(whatbook) = 0 Then
+    Mkdir bookfolder$(whatbook)
+  EndIf
+End Sub
 
 'add new note
 Sub newnote
@@ -201,6 +289,7 @@ Sub deletenote(notenum As integer)
 End Sub
 
 'begin here
+createbook(booknum)
 loadnotes(notenum)
 Do
   cmd$ = Inkey$
