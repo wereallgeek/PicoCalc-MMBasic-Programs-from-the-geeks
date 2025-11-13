@@ -5,13 +5,14 @@ path$ = "b:\notes\"
 dataext$ = ".data"
 note$ = ""
 notenum = 1
+notebook$ = "notebook"
 
 'draw header
 Sub noteheader(whatnote As integer)
   If hasnote(whatnote) = 1 Then
-    Print @(0,0) whatnote
+    Print @(0,0) notebook$ + " #" + Str$(whatnote)
   Else
-    Print @(0,0) " -"
+    Print @(0,0) notebook$ + " #-"
   EndIf
 End Sub
 
@@ -21,11 +22,24 @@ Sub notefooter(whatnote As integer)
   footxt$ = footxt$ + Str$(whatnote)
   footxt$ = footxt$ + "->"
   footxt$ = footxt$ + " [A]dto"
-  footxt$ = footxt$ + " [D]el"
   footxt$ = footxt$ + " [I]ns"
   footxt$ = footxt$ + " [N]ew"
-  footxt$ = footxt$ + " [Q]uit"
   Print @(0,295) footxt$
+End Sub
+
+Sub askDelete
+  CLS
+  loadnotetext(notenum)
+  Print "delete note #" + Str$(notenum) + " (Y/N) ?"
+  cmd$ = Inkey$
+  Do While cmd$ = ""
+    cmd$ = Inkey$
+  Loop
+  If cmd$ = "y" Or cmd$ = "Y" Then
+    deletenote(notenum)
+  Else
+    loadnotes(notenum)
+  EndIf
 End Sub
 
 'compute mote filename
@@ -57,19 +71,27 @@ End Sub
 'add new note at the end
 Sub addnote(notetoadd$ As string)
   notenum = nextNoteSpot(notenum)
+  CLS
   writeNote(notetoadd$)
 End Sub
 
 'move notes to add one here
 Sub insertNoteHere(notetoadd$ As string)
   addNoteSpotAt(notenum)
+  CLS
   writeNote(notetoadd$)
 End Sub
 
-'get note from disk
+'load and display the note
 Sub loadnotes(whatnote As integer)
   CLS
   noteheader(whatnote)
+  loadnotetext(whatnote)
+  notefooter(whatnote)
+End Sub
+
+'get note text from disk
+Sub loadnotetext(whatnote As integer)
   If hasnote(whatnote) = 1 Then
     ' load existing notes from file
     Open notefile$(whatnote) For INPUT As filehandle
@@ -79,7 +101,6 @@ Sub loadnotes(whatnote As integer)
     Loop
     Close #filehandle
   EndIf
-  notefooter(whatnote)
 End Sub
 
 'change displayed note
@@ -116,23 +137,26 @@ End Sub
 
 'get data t store
 Function getNote$()
-  CLS
   Print "text to note"
   Line Input getNote$
 End Function
 
 'add new note
 Sub newnote
+  CLS
   addnote(getNote$())
 End Sub
 
 'add note at curent location
 Sub insertNote
+  CLS
   insertNoteHere(getNote$())
 End Sub
 
 'add to existing note
 Sub addtonote
+  CLS
+  loadnotetext(notenum)
   writeNote(getNote$())
 End Sub
 
@@ -184,11 +208,12 @@ Do
         insertnote
       Case 110 '[n]ew
         newnote
-      Case 100 '[d]elete
-        deletenote(notenum)
-      Case 128 'up
+      Case 8 '[<-BACK]
+        ' deletenote(notenum)
+        askDelete
+      Case 134 '[HOME] (shift-tab)
         first
-      Case 129 'down
+      Case 135 '[END] (shift-del)
         last
       Case 131 'right
         right
