@@ -9,11 +9,15 @@ notebook$ = "notebook"
 
 'draw header
 Sub noteheader(whatnote As integer)
+  headtext$ = "["
+  headtext$ = headtext$ + notebook$
+  headtext$ = headtext$ + "] #"
   If hasnote(whatnote) = 1 Then
-    Print @(0,0) notebook$ + " #" + Str$(whatnote)
+   headtext$ = headtext$ + Str$(whatnote)
   Else
-    Print @(0,0) notebook$ + " #-"
+    headtext$ = headtext$ + "-"
   EndIf
+  Print @(0,0) headtext$
 End Sub
 
 'draw footer
