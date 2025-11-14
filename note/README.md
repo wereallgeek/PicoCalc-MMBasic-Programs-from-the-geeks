@@ -14,7 +14,8 @@ Use at your own risk.
 
 But have fun.
 
- at 
+
+
 ## instructions
 The program will create a notes folder at the root of the SD card. The path is within the BAS, but currently points to b:\notes\
 
