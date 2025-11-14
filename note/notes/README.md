@@ -14,7 +14,7 @@ Use at your own risk.
 
 But have fun.
 
-
+ at 
 ## instructions
 The path to files is within the BAS, but currently points to b:\notes\
 I have put a notes folder in this GIT as an example.
@@ -26,16 +26,16 @@ Each subfolder (notebook) will have a .info file for data storage.
 ### KEYS
 F1 shows an help screen
 
-Left/right/home/end  navigate notes
-
-A to add to a note. 
-
-N for new note - It will be added at the end of current notes
-
-I for insert note - like new note but at current location
-
+F2 to add to an existing note
+F3 to create a new note at the end of the notebook
+F4 to insert a note at the current location
 Backspace - to delete current note. It will domino the files back to remove the "hole"
 
-ESC to exit
+Left/right/home/end  navigate notes
+up/down navigate notebooks
 
-R to reload
+F7 to rename a book
+F8 to add a new book
+F10 to remove a whole book (permanently delete)
+
+ESC to exit

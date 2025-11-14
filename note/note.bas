@@ -46,14 +46,20 @@ Sub helpscreen
   Print ""
   Print "To Use:"
   Print "[F1]       this help"
-  Print "[N]        New note (end of book)"
-  Print "[I]        Insert note (here)"
+  Print "[F2]       add to current note"
+  Print "[F3]       New note (end of book)"
+  Print "[F4]       Insert note (here)"
   Print "[<-back]   delete current note"
   Print "LEFT dpad  previous note"
   Print "RIGHT dpad next note"
   Print "[HOME]     first note in the book"
   Print "[END]      last note in the book"
   Print "UP/DOWN    change book"
+  Print ""
+  Print "[F7]       rename current book"
+  Print "[F8]       add a book"
+  Print "[F10]      delete current book"
+  Print ""
   Print "[ESC]      exit"
   Print ""
   Print @(0,295) "       Press any key to continue"
@@ -61,6 +67,40 @@ Sub helpscreen
   Loop
   CLS
   loadnotes(notenum)
+End Sub
+
+'ask to delete book
+Sub askDebook
+  CLS
+  Print "delete book " + notebook$ + " (Y/N) ?"
+  cmd$ = Inkey$
+  Do While cmd$ = ""
+    cmd$ = Inkey$
+  Loop
+  If cmd$ = "y" Or cmd$ = "Y" Then
+    deletebook(booknum)
+    If hasbook(booknum) = 0 Then
+      booknum = booknum - 1
+      If booknum = 0 Then
+        'no more books
+        booknum = 1
+        notenum = 1
+        createbook(booknum)
+        loadnotes(notenum)
+      Else
+        notenum = 1
+        notebook$ = loadbookinfo$(booknum)
+        loadnotes(notenum)
+      EndIf
+    Else
+      notenum = 1
+      notebook$ = loadbookinfo$(booknum)
+      loadnotes(notenum)
+    EndIf
+  Else
+    notebook$ = loadbookinfo$(booknum)
+    loadnotes(notenum)
+  EndIf
 End Sub
 
 'ask to delete note
@@ -114,6 +154,14 @@ Function hasnote(whatnote As integer)
   hasnote = MM.Info(exists file notefile$(whatnote))
 End Function
 
+'find next available book
+Function nextBookSpot(whatbook As integer)
+  nextBookSpot = whatbook
+  Do While hasbook(nextBookSpot) = 1
+    nextBookSpot = nextBookSpot + 1
+  Loop
+End Function
+
 'find next available spot
 Function nextNoteSpot(whatnote As integer)
   nextNoteSpot = whatnote
@@ -165,6 +213,14 @@ Sub createbook(whatbook As integer)
     EndIf
     newbook(whatbook)
   EndIf
+  booknum = whatbook
+End Sub
+
+'create and load book
+Sub createloadbook
+  CLS
+  createbook(nextBookSpot(booknum))
+  loadnotes(notenum)
 End Sub
 
 'load bookinfo
@@ -239,9 +295,50 @@ Sub left
   loadnotes(notenum)
 End Sub
 
+'previous book
+Sub up
+  If booknum > 1 Then
+    booknum = booknum - 1
+  Else
+    booknum = nextBookSpot(booknum) - 1
+  EndIf
+  notebook$ = loadbookinfo$(booknum)
+  notenum = 1
+  loadnotes(notenum)
+End Sub
+
+'fist book
+Sub shiftup
+  booknum = 1
+  notebook$ = loadbookinfo$(booknum)
+  notenum = 1
+  loadnotes(notenum)
+End Sub
+
+'next book
+Sub down
+  toofar = nextBookSpot(booknum)
+  booknum = booknum + 1
+  If booknum = toofar Then
+    booknum = 1
+  EndIf
+  notebook$ = loadbookinfo$(booknum)
+  notenum = 1
+  loadnotes(notenum)
+End Sub
+
+'last book
+Sub shiftdown
+  booknum = nextBookSpot(booknum) - 1
+  notebook$ = loadbookinfo$(booknum)
+  notenum = 1
+  loadnotes(notenum)
+End Sub
+
+
 'get book name
 Function getBookname$()
-  Print "Naame of the notebook"
+  Print "Name of the notebook"
   Line Input bookname$
   titlen = Len(bookname$)
   If titlen > 20 Then
@@ -249,6 +346,16 @@ Function getBookname$()
   EndIf
   getBookname$ = Left$(bookname$, titlen)
 End Function
+
+'rename current book
+Sub renamebook
+  CLS
+  Print "Rename book."
+  Print "current name is : " + notebook$
+  notebook$ = getBookname$()
+  writeBookinfo(notebook$)
+  loadnotes(notenum)
+End Sub
 
 'get data to store
 Function getNote$()
@@ -292,6 +399,17 @@ Sub addNoteSpotAt(dst As integer)
   Loop
 End Sub
 
+'move folder left
+Sub renameAtBook(cur As integer)
+  nxt = cur + 1
+  If hasbook(nxt) Then
+    Rename bookfolder$(nxt) As bookfolder$(cur)
+    Rename bookinfo$(nxt) As bookinfo$(cur)
+    'domino
+    renameAtBook(nxt)
+  EndIf
+End Sub
+
 'move file left
 Sub renameAtNote(cur As integer)
   nxt = cur + 1
@@ -302,19 +420,33 @@ Sub renameAtNote(cur As integer)
   EndIf
 End Sub
 
+'delete book
+Sub deletebook(whatbook As integer)
+  deletepath$ = bookfolder$(whatbook)
+  dltf$=Dir$(deletepath$ + "\*.*",FILE)
+  Do While dltf$<>""
+    Kill deletepath$ + "\" + dltf$
+    dltf$ = Dir$()
+  Loop
+  Rmdir deletepath$
+  Kill bookinfo$(whatbook)
+  renameAtBook(whatbook)
+End Sub
+
 'delete note
-Sub deletenote(notenum As integer)
-  If hasnote(notenum) = 1 Then
-    Kill notefile$(notenum)
-    renameAtNote(notenum)
+Sub deletenote(whatnote As integer)
+  If hasnote(whatnote) = 1 Then
+    Kill notefile$(whatnote)
+    renameAtNote(whatnote)
   EndIf
   'display new current note
-  If hasnote(notenum) = 0 Then
+  If hasnote(whatnote) = 0 Then
     'the deleted file was last, move
     left
   Else
     'display at current index
-    loadnotes(notenum)
+    notenum = whatnote
+    loadnotes(whatnote)
   EndIf
 End Sub
 
@@ -325,28 +457,47 @@ Do
   cmd$ = Inkey$
   If cmd$ <> "" Then
     Select Case Asc(cmd$)
-      Case 97 '[a]dd to note
+      Case 144 '[F2] add to note
         addtonote
-      Case 105 '[i]nsert
+      Case 97 '[A]dd to note
+        addtonote
+      Case 146 '[F4] insert
         insertnote
-      Case 110 '[n]ew
+      Case 105 '[I]nsert
+        insertnote
+      Case 147 '[F3] new
+        newnote
+      Case 110 '[N]ew
         newnote
       Case 8 '[<-BACK]
-        ' deletenote(notenum)
         askDelete
       Case 134 '[HOME] (shift-tab)
         first
       Case 135 '[END] (shift-del)
         last
+      Case 128 'up
+        up
+      Case 136 'shift-up
+        shiftup
+      Case 129 'down
+        down
+      Case 137 'shift-down
+        shiftdown
       Case 131 'right
         right
       Case 130 'left
         left
-      Case 114 '[r]eload
+      Case 114 '[R]eload
         loadnotes(notenum)
       Case 145 '[F1] help
         helpscreen
-      Case 113 '[q]uit
+      Case 151 '[F7] rename book
+        renamebook
+      Case 152 '[F8] add a book
+        createloadbook
+      Case 154 '[F10] add a book
+        askDebook
+      Case 113 '[Q]uit
         Exit Do
       Case 27 'ESC
         Exit Do
