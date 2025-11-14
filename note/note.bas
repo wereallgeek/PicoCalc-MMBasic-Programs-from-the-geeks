@@ -22,6 +22,7 @@ Sub noteheader(whatnote As integer)
   Else
     headtext$ = headtext$ + "-"
   EndIf
+  Color RGB(44,222,200)
   Print @(0,0) headtext$
 End Sub
 
@@ -30,14 +31,19 @@ Sub notefooter(whatnote As integer)
   npagetxt$ = "<-"
   npagetxt$ = npagetxt$ + Str$(whatnote)
   npagetxt$ = npagetxt$ + "->"
-  footxt$ = "Note " + ver$ + "     "
-  footxt$ = footxt$ + "[F1] or help"
+  footxt$ = "Note " + ver$
+  msgtxt$ = "[F1] or help"
+  Color RGB(44,222,200)
   Print @(0,295) footxt$
+  Color RGB(30,180,180)
+  Print @(115,295) msgtxt$
+  Color RGB(44,222,200)
   Print @(250,295) npagetxt$
 End Sub
 
 'draw helpscreen
 Sub helpscreen
+  Color RGB(230,180,55)
   CLS
   Print "  *** PicCalc simple notepad " + ver$ + " ***"
   Print ""
@@ -73,6 +79,7 @@ End Sub
 
 'ask to delete book
 Sub askDebook
+  Color RGB(240,40,40)
   CLS
   Print "delete book " + notebook$ + " (Y/N) ?"
   cmd$ = Inkey$
@@ -109,6 +116,7 @@ End Sub
 Sub askDelete
   CLS
   loadnotetext(notenum)
+  Color RGB(240,80,40)
   Print "delete note #" + Str$(notenum) + " (Y/N) ?"
   cmd$ = Inkey$
   Do While cmd$ = ""
@@ -180,14 +188,14 @@ End Function
 'save book info
 Sub writeBookinfo(infotoadd$ As string)
   Open bookinfo$(booknum) For output As filehandle
-  Print #filehandle, infotoadd$
+    Print #filehandle, infotoadd$
   Close #filehandle
 End Sub
 
 'save the new note to the file
 Sub writeNote(notetoadd$ As string)
   Open notefile$(notenum) For append As filehandle
-  Print #filehandle, notetoadd$
+    Print #filehandle, notetoadd$
   Close #filehandle
   loadnotes(notenum)
 End Sub
@@ -271,6 +279,7 @@ Sub loadnotetext(whatnote As integer)
     Open notefile$(whatnote) For INPUT As filehandle
     Do While Not Eof(filehandle)
       Line Input #filehandle, note$
+      Color RGB(200,200,200)
       Print note$
     Loop
     Close #filehandle
@@ -352,7 +361,9 @@ End Sub
 
 'get book name
 Function getBookname$()
+  Color RGB(40,240,40)
   Print "Name of the notebook"
+  Color RGB(240,240,240)
   Line Input bookname$
   titlen = Len(bookname$)
   If titlen > 20 Then
@@ -364,8 +375,10 @@ End Function
 'rename current book
 Sub renamebook
   CLS
+  Color RGB(40,240,40)
   Print "Rename book."
   Print "current name is : " + notebook$
+  Color RGB(240,240,240)
   notebook$ = getBookname$()
   writeBookinfo(notebook$)
   loadnotes(notenum)
@@ -373,7 +386,9 @@ End Sub
 
 'get data to store
 Function getNote$()
+  Color RGB(40,240,40)
   Print "text to note"
+  Color RGB(240,240,240)
   Line Input getNote$
 End Function
 
