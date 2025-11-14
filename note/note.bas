@@ -8,6 +8,7 @@ note$ = ""
 notenum = 1
 notebook$ = "notebook"
 booknum = 1
+ver$ = "V1.0"
 
 'draw header
 Sub noteheader(whatnote As integer)
@@ -24,13 +25,42 @@ End Sub
 
 'draw footer
 Sub notefooter(whatnote As integer)
-  footxt$ = "<-"
-  footxt$ = footxt$ + Str$(whatnote)
-  footxt$ = footxt$ + "->"
-  footxt$ = footxt$ + " [A]dto"
-  footxt$ = footxt$ + " [I]ns"
-  footxt$ = footxt$ + " [N]ew"
+  npagetxt$ = "<-"
+  npagetxt$ = npagetxt$ + Str$(whatnote)
+  npagetxt$ = npagetxt$ + "->"
+  footxt$ = "Note " + ver$ + "     "
+  footxt$ = footxt$ + "[F1] or help"
   Print @(0,295) footxt$
+  Print @(250,295) npagetxt$
+End Sub
+
+'draw helpscreen
+Sub helpscreen
+  CLS
+  Print "  *** PicCalc simple notepad " + ver$ + " ***"
+  Print ""
+  Print "Meant to take note, this software"
+  Print "stores notes in files in the folder"
+  Print path$
+  Print ""
+  Print ""
+  Print "To Use:"
+  Print "[F1]       this help"
+  Print "[N]        New note (end of book)"
+  Print "[I]        Insert note (here)"
+  Print "[<-back]   delete current note"
+  Print "LEFT dpad  previous note"
+  Print "RIGHT dpad next note"
+  Print "[HOME]     first note in the book"
+  Print "[END]      last note in the book"
+  Print "UP/DOWN    change book"
+  Print "[ESC]      exit"
+  Print ""
+  Print @(0,295) "       Press any key to continue"
+  Do While Inkey$ = ""
+  Loop
+  CLS
+  loadnotes(notenum)
 End Sub
 
 'ask to delete note
@@ -314,6 +344,8 @@ Do
         left
       Case 114 '[r]eload
         loadnotes(notenum)
+      Case 145 '[F1] help
+        helpscreen
       Case 113 '[q]uit
         Exit Do
       Case 27 'ESC

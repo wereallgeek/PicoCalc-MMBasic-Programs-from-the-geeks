@@ -24,6 +24,8 @@ Each subfolder (notebook) will have a .info file for data storage.
 
 
 ### KEYS
+F1 shows an help screen
+
 Left/right/home/end  navigate notes
 
 A to add to a note. 
