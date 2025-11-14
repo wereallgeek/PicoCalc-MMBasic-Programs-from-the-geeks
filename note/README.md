@@ -26,15 +26,25 @@ Each subfolder (notebook) will have a .info file for data storage.
 F1 shows an help screen
 
 F2 to add to an existing note
+
 F3 to create a new note at the end of the notebook
+
 F4 to insert a note at the current location
+
 Backspace - to delete current note. It will domino the files back to remove the "hole"
 
+
+
 Left/right/home/end  navigate notes
+
 up/down navigate notebooks
 
 F7 to rename a book
+
 F8 to add a new book
+
 F10 to remove a whole book (permanently delete)
+
+
 
 ESC to exit
