@@ -16,10 +16,9 @@ But have fun.
 
  at 
 ## instructions
-The path to files is within the BAS, but currently points to b:\notes\
-I have put a notes folder in this GIT as an example.
+The program will create a notes folder at the root of the SD card. The path is within the BAS, but currently points to b:\notes\
 
-The program would store each note (numbered) as a file with .data extension in a notebook (collection) subfolder. It is plain text.
+It will store each note (numbered) as a file with .data extension in a notebook (collection) subfolder. It is plain text.
 Each subfolder (notebook) will have a .info file for data storage.
 
 

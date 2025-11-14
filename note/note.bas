@@ -13,6 +13,8 @@ ver$ = "V1.0"
 'draw header
 Sub noteheader(whatnote As integer)
   headtext$ = "["
+  headtext$ = headtext$ + Str$(booknum)
+  headtext$ = headtext$ + "-"
   headtext$ = headtext$ + notebook$
   headtext$ = headtext$ + "] #"
   If hasnote(whatnote) = 1 Then
@@ -139,6 +141,11 @@ Function notefile$(whatnote As integer)
   notefile$ = filename$
 End Function
 
+'check if library exist
+Function haslibrary()
+  haslibrary = MM.Info(exists dir path$)
+End Function
+
 'check if book exist
 Function hasbook(whatbook As integer)
   hasbook = MM.Info(exists dir bookfolder$(whatbook))
@@ -197,6 +204,13 @@ Sub insertNoteHere(notetoadd$ As string)
   addNoteSpotAt(notenum)
   CLS
   writeNote(notetoadd$)
+End Sub
+
+'create library
+Sub createlibrary
+  If haslibrary() = 0 Then
+    Mkdir path$
+  EndIf
 End Sub
 
 'create book
@@ -451,6 +465,7 @@ Sub deletenote(whatnote As integer)
 End Sub
 
 'begin here
+createlibrary
 createbook(booknum)
 loadnotes(notenum)
 Do
