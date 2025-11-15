@@ -152,8 +152,9 @@ End Sub
 'ask to delete note
 Sub askDelete
   CLS
-  Font (1)
+  Font (notesize)
   loadnotetext(notenum)
+  Font (1)
   Color RGB(240,80,40)
   Print "delete note #" + Str$(notenum) + " (Y/N) ?"
   cmd$ = Inkey$
@@ -175,8 +176,9 @@ Sub askmove
   CLS
   okleft = 0
   okright = 0
-  Font (1)
+  Font (notesize)
   loadnotetext(notenum)
+  Font (1)
   moveq$ = "move note #" + Str$(notenum) + " ("
   If notenum > 1 Then
     moveq$ = moveq$ + "<"
@@ -556,7 +558,7 @@ Function getNote$()
   Color RGB(40,240,40)
   Print "text to note"
   Color RGB(240,240,240)
-  Font (9)
+  Font (notesize)
   Line Input getNote$
   Font (1)
 End Function
