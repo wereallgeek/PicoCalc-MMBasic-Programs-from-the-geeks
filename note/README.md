@@ -34,13 +34,17 @@ F4 to insert a note at the current location
 
 F6 to move the current note within the book
 
-Backspace - to delete current note. It will domino the files back to remove the "hole"
+Backspace to delete current note. It will domino the files back to remove the "hole"
 
 
 
 Left/right/home/end  navigate notes
 
 up/down navigate notebooks
+
+shift +/shift - to change note fontsize
+
+
 
 F7 to rename a book
 

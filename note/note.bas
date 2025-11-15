@@ -12,6 +12,13 @@ notebook$ = "notebook"
 booknum = 1
 lastbook = 1
 ver$ = "V1.2"
+notesize = 9
+nsmax = 2
+nsbgr = 4
+nsbig = 1
+nsmed = 9
+nssml = 7
+nsmin = 8
 
 'draw header
 Sub noteheader(whatnote As integer)
@@ -82,6 +89,8 @@ Sub helpscreen
   Print "[HOME]     first note in the book"
   Print "[END]      last note in the book"
   Print "UP/DOWN    change book"
+  Print ""
+  Print "shift[+/-] change note font size"
   Print ""
   Print "[F7]       rename current book"
   Print "[F8]       add a book"
@@ -295,12 +304,24 @@ Sub writeBookinfo(infotoadd$ As string)
   Close #filehandle
 End Sub
 
+Sub storelib
+  Open libinfo$() For output As filehandle
+    Print #filehandle, Str$(lastbook)
+    Print #filehandle, Str$(notesize)
+  Close #filehandle
+End Sub
+
+Sub fontchanged
+  If lastsize <> notesize Then
+    lastsize = notesize
+    storelib
+  EndIf
+End Sub
+
 Sub bookchanged
   If lastbook <> booknum Then
     lastbook = booknum
-    Open libinfo$() For output As filehandle
-      Print #filehandle, Str$(lastbook)
-    Close #filehandle
+    storelib
   EndIf
 End Sub
 
@@ -331,8 +352,10 @@ Sub createlibrary
   If haslibrary() = 0 Then
     Mkdir path$
     lastbook = 1
+    lastsize = nsmed
+    notesize = nsmed
   Else 'use preexisting library
-    lastbook = getlibinfo()
+    getlibinfo
   EndIf
 End Sub
 
@@ -362,15 +385,19 @@ Sub createloadbook
   loadnotes(notenum)
 End Sub
 
-Function getlibinfo()
+Sub getlibinfo
   somebook$ = "1"
+  somesize$ = Str$(nsmed)
   If MM.Info(exists file libinfo$()) = 1 Then
     Open libinfo$() For INPUT As filehandle
     Line Input #filehandle, somebook$
+    Line Input #filehandle, somesize$
     Close #filehandle
   EndIf
-  getlibinfo = Val(somebook$)
-End Function
+  lastbook = Val(somebook$)
+  notesize = Val(somesize$)
+  lastsize = notesize
+End Sub
 
 'load bookinfo
 Function loadbookinfo$(whatbook As integer)
@@ -403,7 +430,7 @@ End Sub
 Sub loadnotetext(whatnote As integer)
   If hasnote(whatnote) = 1 Then
     ' load existing notes from file
-    Font (9)
+    Font (notesize)
     Open notefile$(whatnote) For INPUT As filehandle
     Do While Not Eof(filehandle)
       Line Input #filehandle, note$
@@ -631,6 +658,40 @@ Sub deletenote(whatnote As integer)
   EndIf
 End Sub
 
+'display note biger
+Sub biggerfont
+  If notesize = nsmin Then
+    notesize = nssml
+  Else If notesize = nssml Then
+    notesize = nsmed
+  Else If notesize = nsmed Then
+    notesize = nsbig
+  Else If notesize = nsbig Then
+    notesize = nsbgr
+  Else If notesize = nsbgr Then
+    notesize = nsmax
+  EndIf
+  fontchanged
+  loadnotes(notenum)
+End Sub
+
+'display note smaller
+Sub smallerfont
+  If notesize = nsmax Then
+    notesize = nsbgr
+  Else If notesize = nsbgr Then
+    notesize = nsbig
+  Else If notesize = nsbig Then
+    notesize = nsmed
+  Else If notesize = nsmed Then
+    notesize = nssml
+  Else If notesize = nssml Then
+    notesize = nsmin
+  EndIf
+  fontchanged
+  loadnotes(notenum)
+End Sub
+
 'begin here
 createlibrary
 'get last book + validate
@@ -682,6 +743,10 @@ Do
         createloadbook
       Case 154 '[F10] add a book
         askDebook
+      Case 43 'shift-[+]
+        biggerfont
+      Case 95 'shift-[-]
+        smallerfont
       Case 113 '[Q]uit
         Exit Do
       Case 27 'ESC
