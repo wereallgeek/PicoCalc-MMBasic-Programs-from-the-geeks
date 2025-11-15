@@ -3,55 +3,74 @@ filehandle = 1
 filename$ = "notes.data"
 path$ = "b:\notes\"
 bookinfoext$ = ".inf"
+libinfofilename$ = "libinfo"
 dataext$ = ".data"
+temp$ = "notetemp"
 note$ = ""
 notenum = 1
 notebook$ = "notebook"
 booknum = 1
-ver$ = "V1.0"
+lastbook = 1
+ver$ = "V1.2"
 
 'draw header
 Sub noteheader(whatnote As integer)
   headtext$ = "["
-  headtext$ = headtext$ + Str$(booknum)
-  headtext$ = headtext$ + "-"
   headtext$ = headtext$ + notebook$
-  headtext$ = headtext$ + "] #"
-  If hasnote(whatnote) = 1 Then
-   headtext$ = headtext$ + Str$(whatnote)
-  Else
-    headtext$ = headtext$ + "-"
-  EndIf
+  headtext$ = headtext$ + "]"
+  headbat$ = batlevel$()
+  batpos = 320-(Len(headbat$)*7)
+  Font (7)
   Color RGB(44,222,200)
   Print @(0,0) headtext$
+  Font (7)
+  Color RGB(30,180,180)
+  Print @(batpos,0) headbat$
+  Font (1)
 End Sub
 
 'draw footer
 Sub notefooter(whatnote As integer)
-  npagetxt$ = "<-"
-  npagetxt$ = npagetxt$ + Str$(whatnote)
-  npagetxt$ = npagetxt$ + "->"
+  npagetxt$ = "<"
+  If hasnote(whatnote) = 1 Then
+    npagetxt$ = npagetxt$ + Str$(whatnote)
+  Else
+    npagetxt$ = npagetxt$ + "-"
+  EndIf
+  npagetxt$ = npagetxt$ + "/"
+  npagetxt$ = npagetxt$ + Str$(nextNoteSpot(whatnote)-1)
+  npagetxt$ = npagetxt$ + ">"
+  npagepos = 320-(Len(npagetxt$)*7)
   footxt$ = "Note " + ver$
   msgtxt$ = "[F1] or help"
+  msgpos = 160-((Len(msgtxt$)*4)/2)
+  Font (7)
   Color RGB(44,222,200)
-  Print @(0,295) footxt$
+  Print @(0,304) footxt$
+  Font (8)
   Color RGB(30,180,180)
-  Print @(115,295) msgtxt$
+  Print @(msgpos,304) msgtxt$
+  Font (7)
   Color RGB(44,222,200)
-  Print @(250,295) npagetxt$
+  Print @(npagepos,304) npagetxt$
+  Font (1)
 End Sub
 
 'draw helpscreen
 Sub helpscreen
   Color RGB(230,180,55)
   CLS
+  Font (1)
   Print "  *** PicCalc simple notepad " + ver$ + " ***"
   Print ""
-  Print "Meant to take note, this software"
-  Print "stores notes in files in the folder"
+  Font (9)
+  Print "Meant to take notes, this software"
+  Print "stores notes in files in the folder:"
+  Font (1)
   Print path$
   Print ""
   Print ""
+  Font (9)
   Print "To Use:"
   Print "[F1]       this help"
   Print "[F2]       add to current note"
@@ -70,6 +89,7 @@ Sub helpscreen
   Print ""
   Print "[ESC]      exit"
   Print ""
+  Font (1)
   Print @(0,295) "       Press any key to continue"
   Do While Inkey$ = ""
   Loop
@@ -79,9 +99,16 @@ End Sub
 
 'ask to delete book
 Sub askDebook
-  Color RGB(240,40,40)
   CLS
-  Print "delete book " + notebook$ + " (Y/N) ?"
+  Color RGB(240,40,40)
+  Font (1)
+  Print "delete book "
+  Color RGB(30,180,180)
+  Font (7)
+  Print notebook$
+  Color RGB(240,40,40)
+  Font (1)
+  Print " (Y/N) ?"
   cmd$ = Inkey$
   Do While cmd$ = ""
     cmd$ = Inkey$
@@ -110,11 +137,13 @@ Sub askDebook
     notebook$ = loadbookinfo$(booknum)
     loadnotes(notenum)
   EndIf
+  bookchanged
 End Sub
 
 'ask to delete note
 Sub askDelete
   CLS
+  Font (1)
   loadnotetext(notenum)
   Color RGB(240,80,40)
   Print "delete note #" + Str$(notenum) + " (Y/N) ?"
@@ -129,6 +158,70 @@ Sub askDelete
   EndIf
 End Sub
 
+'ask to move note
+Sub askmove
+  If notenum = nextBookSpot(notenum) Then
+    Exit Sub
+  EndIf
+  CLS
+  okleft = 0
+  okright = 0
+  Font (1)
+  loadnotetext(notenum)
+  moveq$ = "move note #" + Str$(notenum) + " ("
+  If notenum > 1 Then
+    moveq$ = moveq$ + "<"
+    okleft = 1
+  Else
+    moveq$ = moveq$ + " "
+  EndIf
+  moveq$ = moveq$ + "/"
+  If notenum < (nextBookSpot(notenum) -1) Then
+    moveq$ = moveq$ + ">"
+    okright = 1
+  Else
+    moveq$ = moveq$ + " "
+  EndIf
+  moveq$ = moveq$ + ") ?"
+  Color RGB(240,80,40)
+  Print moveq$
+  Do
+    cmd$ = Inkey$
+    If cmd$ <> "" Then
+      Select Case Asc(cmd$)
+        Case 131 'right
+          If okright = 1 Then
+            swapNotes(notenum, notenum + 1)
+            Exit Do
+          EndIf
+        Case 130 'left
+          If okleft = 1 Then
+            swapNotes(notenum, notenum - 1)
+            Exit Do
+          EndIf
+        Case 27 'ESC
+          Exit Do
+      End Select
+    EndIf
+  Loop
+  loadnotes(notenum)
+End Sub
+
+'Compute battery info
+Function batlevel$()
+  buildstring$ = "+"
+  If MM.Info(charging) = 0 Then
+    buildstring$ = " "
+  EndIf
+  buildstring$ = buildstring$ + Str$(MM.Info(battery))
+  batlevel$ = buildstring$ + "%"
+End Function
+
+'compute library info file
+Function libinfo$()
+  libinfo$ = path$ + libinfofilename$ + dataext$
+End Function
+
 'compute book foldername
 Function bookfolder$(whatbook As integer)
   bookfolder$ = path$ + Str$(whatbook)
@@ -137,6 +230,16 @@ End Function
 'compute book info filename
 Function bookinfo$(whatbook As integer)
   bookinfo$ = path$ + Str$(whatbook) + bookinfoext$
+End Function
+
+'compute tempfile name
+Function tempfile$()
+  filename$ = path$
+  filename$ = filename$ + Str$(booknum)
+  filename$ = filename$ + "\"
+  filename$ = filename$ + temp$
+  filename$ = filename$ + dataext$
+  tempfile$ = filename$
 End Function
 
 'compute note filename
@@ -192,6 +295,15 @@ Sub writeBookinfo(infotoadd$ As string)
   Close #filehandle
 End Sub
 
+Sub bookchanged
+  If lastbook <> booknum Then
+    lastbook = booknum
+    Open libinfo$() For output As filehandle
+      Print #filehandle, Str$(lastbook)
+    Close #filehandle
+  EndIf
+End Sub
+
 'save the new note to the file
 Sub writeNote(notetoadd$ As string)
   Open notefile$(notenum) For append As filehandle
@@ -218,6 +330,9 @@ End Sub
 Sub createlibrary
   If haslibrary() = 0 Then
     Mkdir path$
+    lastbook = 1
+  Else 'use preexisting library
+    lastbook = getlibinfo()
   EndIf
 End Sub
 
@@ -236,14 +351,26 @@ Sub createbook(whatbook As integer)
     newbook(whatbook)
   EndIf
   booknum = whatbook
+  bookchanged
 End Sub
 
 'create and load book
 Sub createloadbook
   CLS
   createbook(nextBookSpot(booknum))
+  bookchanged
   loadnotes(notenum)
 End Sub
+
+Function getlibinfo()
+  somebook$ = "1"
+  If MM.Info(exists file libinfo$()) = 1 Then
+    Open libinfo$() For INPUT As filehandle
+    Line Input #filehandle, somebook$
+    Close #filehandle
+  EndIf
+  getlibinfo = Val(somebook$)
+End Function
 
 'load bookinfo
 Function loadbookinfo$(whatbook As integer)
@@ -276,6 +403,7 @@ End Sub
 Sub loadnotetext(whatnote As integer)
   If hasnote(whatnote) = 1 Then
     ' load existing notes from file
+    Font (9)
     Open notefile$(whatnote) For INPUT As filehandle
     Do While Not Eof(filehandle)
       Line Input #filehandle, note$
@@ -284,6 +412,7 @@ Sub loadnotetext(whatnote As integer)
     Loop
     Close #filehandle
   EndIf
+  Font (1)
 End Sub
 
 'change displayed note
@@ -325,6 +454,7 @@ Sub up
   Else
     booknum = nextBookSpot(booknum) - 1
   EndIf
+  bookchanged
   notebook$ = loadbookinfo$(booknum)
   notenum = 1
   loadnotes(notenum)
@@ -333,6 +463,7 @@ End Sub
 'fist book
 Sub shiftup
   booknum = 1
+  bookchanged
   notebook$ = loadbookinfo$(booknum)
   notenum = 1
   loadnotes(notenum)
@@ -345,6 +476,7 @@ Sub down
   If booknum = toofar Then
     booknum = 1
   EndIf
+  bookchanged
   notebook$ = loadbookinfo$(booknum)
   notenum = 1
   loadnotes(notenum)
@@ -353,6 +485,7 @@ End Sub
 'last book
 Sub shiftdown
   booknum = nextBookSpot(booknum) - 1
+  bookchanged
   notebook$ = loadbookinfo$(booknum)
   notenum = 1
   loadnotes(notenum)
@@ -364,32 +497,41 @@ Function getBookname$()
   Color RGB(40,240,40)
   Print "Name of the notebook"
   Color RGB(240,240,240)
+  Font (7)
   Line Input bookname$
   titlen = Len(bookname$)
-  If titlen > 20 Then
-    titlen = 20
+  If titlen > 45 Then
+    titlen = 45
   EndIf
   getBookname$ = Left$(bookname$, titlen)
+  Font (1)
 End Function
 
 'rename current book
 Sub renamebook
   CLS
-  Color RGB(40,240,40)
+  Color RGB(240,120,80)
+  Font (1)
   Print "Rename book."
-  Print "current name is : " + notebook$
-  Color RGB(240,240,240)
+  Print "current name is : "
+  Color RGB(30,180,180)
+  Font (7)
+  Print notebook$
+  Color RGB(240,120,80)
+  Font (1)
   notebook$ = getBookname$()
   writeBookinfo(notebook$)
   loadnotes(notenum)
 End Sub
 
-'get data to store
+'data to note
 Function getNote$()
   Color RGB(40,240,40)
   Print "text to note"
   Color RGB(240,240,240)
+  Font (9)
   Line Input getNote$
+  Font (1)
 End Function
 
 'create book folder
@@ -449,6 +591,16 @@ Sub renameAtNote(cur As integer)
   EndIf
 End Sub
 
+'swap two files
+Sub swapNotes(nfrom As integer, nto As integer)
+  If hasnote(nfrom) And hasnote(nto) Then
+    Rename notefile$(nfrom) As tempfile$()
+    Rename notefile$(nto) As notefile$(nfrom)
+    Rename tempfile$() As notefile$(nto)
+    notenum = nto
+  EndIf
+End Sub
+
 'delete book
 Sub deletebook(whatbook As integer)
   deletepath$ = bookfolder$(whatbook)
@@ -481,7 +633,8 @@ End Sub
 
 'begin here
 createlibrary
-createbook(booknum)
+'get last book + validate
+createbook(lastbook)
 loadnotes(notenum)
 Do
   cmd$ = Inkey$
@@ -521,6 +674,8 @@ Do
         loadnotes(notenum)
       Case 145 '[F1] help
         helpscreen
+      Case 150 '[F6] move note
+        askmove
       Case 151 '[F7] rename book
         renamebook
       Case 152 '[F8] add a book

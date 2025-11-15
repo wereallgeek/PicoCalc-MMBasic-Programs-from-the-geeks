@@ -32,6 +32,8 @@ F3 to create a new note at the end of the notebook
 
 F4 to insert a note at the current location
 
+F6 to move the current note within the book
+
 Backspace - to delete current note. It will domino the files back to remove the "hole"
 
 
