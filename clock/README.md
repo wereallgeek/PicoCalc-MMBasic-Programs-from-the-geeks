@@ -20,4 +20,13 @@ https://thebackshed.com/forum/ViewTopic.php?FID=16&TID=15586
 I made minor alterations (removed backlight LED pin control) and it worked. This was the base for the current software. Thanks a lot to nbrok a.k.a Nick de pe1goo
 
 ## instructions
+
 The program runs with local time. Hopefully a RTC will be added to my maching and render this actually useful. 
+
+## keys
+
+F7 change time
+
+F8 change date
+
+ESC exit
