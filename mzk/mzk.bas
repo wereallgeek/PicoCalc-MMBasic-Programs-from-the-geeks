@@ -54,26 +54,30 @@ mpquit = 0
 mpnext = 0
 mppathlen = Len(path$)
 
-'music folder init
-mpf1=1
-mpf$=Dir$(path$ + "*.m*", FILE) 'mp3+mod
+Sub initializeMp3
+ 'music folder init
+ mpf1=1
+ mpf$=Dir$(path$ + "*.m*", FILE) 'mp3+mod
 
-Do While mpf$<>""
- mzk$(mpf1)=path$+mpf$
- mpf$=Dir$()
- mpf1=mpf1+1
-Loop
+ Do While mpf$<>""
+  mzk$(mpf1)=path$+mpf$
+  mpf$=Dir$()
+  mpf1=mpf1+1
+ Loop
 
-On error skip 4
- Open (path$ + setupfile$) For input As #1
-  Line Input #1, shuffle$
-  Line Input #1, mpdmode$
- Close #1
-On error abort
+ On error skip 4
+  Open (path$ + setupfile$) For input As #1
+   Line Input #1, shuffle$
+   Line Input #1, mpdmode$
+  Close #1
+ On error abort
 
-If shuffle$ = "true" Then
- doshuffle
-EndIf
+ If shuffle$ = "true" Then
+  doshuffle
+ EndIf
+End Sub
+
+initializeMp3
 
 'set shuffled play
 Sub doshuffle
@@ -437,6 +441,24 @@ Do While mpquit = 0
     EndIf
     mpdmode$ = "cover"
     writesetup
+   Case 154: Play stop 'F10 = delete
+    Print @(0,0) ind$ + "========"
+    Kill mzk$(mpx)
+    mpnamelen = Len(mzk$(mpx)) - 4
+    If mpnamelen > 0 Then
+      covername$ = Left$(mzk$(mpx), mpnamelen) + ".bmp"
+      hascover = MM.Info(exists file covername$)
+      If hascover = 1 Then
+        Kill covername$
+      EndIf
+    EndIf
+    'play anew
+    mpcover = 0
+    mpnext = 0
+    checkbat
+    mptime = MM.Info(uptime)
+    noinfo
+    initializeMp3
    Case 9
     mpx = 0
     writeshuffle
