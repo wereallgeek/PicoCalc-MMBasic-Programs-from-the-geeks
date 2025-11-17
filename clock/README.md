@@ -25,6 +25,10 @@ The program runs with local time. Hopefully a RTC will be added to my maching an
 
 ## keys
 
+F1 clock mode
+
+F2 calendar mode
+
 F7 change time
 
 F8 change date
