@@ -7,9 +7,9 @@
 '
 mode$="clock"
 'calendar cell size
-Const CELL_Y = 45
+Const CELL_Y = 41
 Const CELL_X = 45
-Const SIZE_Y = 42
+Const SIZE_Y = 39
 Const SIZE_X = 42
 CLS
 xo=MM.HRES-160:yo=MM.VRES-160:r=100
