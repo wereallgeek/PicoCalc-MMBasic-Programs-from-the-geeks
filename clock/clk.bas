@@ -3,14 +3,31 @@
 ' found randomly online at
 'https://thebackshed.com/forum/ViewTopic.php?FID=16&TID=15586
 '
+' added calendar
+'
+mode$="clock"
+'calendar cell size
+Const CELL_Y = 45
+Const CELL_X = 45
+Const SIZE_Y = 42
+Const SIZE_X = 42
 CLS
 xo=MM.HRES-160:yo=MM.VRES-160:r=100
 'configure colours here.
+'analog clock
 hrsc=&h00aa00
 minc=&h00aa00
 secc=&h00aa00
 txtc=&h00aa00
 clkc=&h00aa00
+'digital clock and calendar
+digiclkc   = &h00aa00
+caltitlec  = &h00aa00
+caldayc    = &h00aa00
+caldaynumc = &H8410
+otherdayc  = &H8410
+todayc     = &h00aa00
+
 'do we have a realtimeclock?
 haveRtc =0 '0 = no
 
@@ -21,12 +38,19 @@ Do
  cmd$ = Inkey$
  If cmd$ <> "" Then
   Select Case Asc(cmd$)
+  drawCurrentCalendar
+   Case 145 '[F1]
+    mode$="clock"
+    drawCurrentScreen
+   Case 146 '[F2]
+    mode$="calendar"
+    drawCurrentScreen
    Case 151 'f7
     settime
-    drawclockface
+    drawCurrentScreen
    Case 152 'f8
     setdate
-    drawclockface
+    drawCurrentScreen
    Case 27  'esc
     Exit Do
   End Select
@@ -38,6 +62,15 @@ End Sub
 CLS
 SetTick 0,0
 End
+
+Sub drawCurrentScreen
+ If mode$="clock" Then
+  drawclockface
+ ElseIf mode$="calendar" Then
+  drawCurrentCalendar
+ EndIf
+End Sub
+
 Sub drawclockface
  CLS
  tau=8*Atn(1)
@@ -54,28 +87,34 @@ Sub drawclockface
 End Sub
 
 Sub drawclock
- ti$=Time$
- s=Val(Mid$(ti$,7))
- m=Val(Mid$(ti$,4,2))+s/60
- h=Val(Left$(ti$,2))+m/60
- Text 0,0,Date$,l,7,2,txtc
- Text 210,0,Day$(now)+"   ",l,7,2,txtc
- t=s/60
- x=xs:y=ys
- c=secc
- rh=0.925*r
- draws
- c=minc
- xs=x:ys=y
- t=m/60
- x=xm:y=ym:rh=0.9*r
- draws
- xm=x:ym=y
- t=(h-12*(h>=12))/12
- x=xh:y=yh:rh=0.55*r
- c=hrsc
- draws
- xh=x:yh=y:rh=r-1
+ If mode$="clock" Then
+  ti$=Time$
+  s=Val(Mid$(ti$,7))
+  m=Val(Mid$(ti$,4,2))+s/60
+  h=Val(Left$(ti$,2))+m/60
+  Text 0,0,Date$,l,7,2,txtc
+  Text 210,0,Day$(now)+"   ",l,7,2,txtc
+  t=s/60
+  x=xs:y=ys
+  c=secc
+  rh=0.925*r
+  draws
+  c=minc
+  xs=x:ys=y
+  t=m/60
+  x=xm:y=ym:rh=0.9*r
+  draws
+  xm=x:ym=y
+  t=(h-12*(h>=12))/12
+  x=xh:y=yh:rh=0.55*r
+  c=hrsc
+  draws
+  xh=x:yh=y:rh=r-1
+ ElseIf mode$="calendar" Then
+  Colour digiclkc
+  Font 1
+  Print @(255, 5) Time$
+ EndIf
 End Sub
 Sub draws
  Line xo,yo,x+xo,y+yo,1,0
@@ -152,4 +191,112 @@ Function isnum(inchar$ As string)
     curchar$ = Mid$(inchar$, i, 1)
     If curchar$ < "0" Or curchar$ > "9" Then isnum = 0
   Next i
+End Function
+
+Sub drawCurrentCalendar
+ ' Get current date components (as numbers)
+ CurrentDay = Val(Mid$(Date$, 1, 2))
+ CurrentMonth = Val(Mid$(Date$, 4, 2))
+ CurrentYear = Val(Mid$(Date$, 7, 4))
+
+ ' Draw the calendar for the current month
+ DrawCalendar CurrentMonth, CurrentYear, CurrentDay
+End Sub
+
+Sub DrawCalendar(Month, Year, Today)
+ ' Draws a calendar for the specified Month and Year
+ Local MonthName$, DaysInMonth, FirstDayOfWeek, Day, X, Y, Row, Col, DaysOfWeek$(7), MonthNames$(12)
+
+ CLS
+ Colour caltitlec
+
+ ' Month Names
+ MonthNames$(1) = "January" : MonthNames$(2) = "February" : MonthNames$(3) = "March"
+ MonthNames$(4) = "April" : MonthNames$(5) = "May" : MonthNames$(6) = "June"
+ MonthNames$(7) = "July" : MonthNames$(8) = "August" : MonthNames$(9) = "September"
+ MonthNames$(10) = "October" : MonthNames$(11) = "November" : MonthNames$(12) = "December"
+ MonthName$ = MonthNames$(Month)
+
+ ' Display Month and Year Header (Font 3 is fine)
+ Font 3
+ Print @(10, 10) MonthName$; " "; Year
+
+ ' Display Day of Week Headers (Font 1 is fine)
+ Font 1
+ DaysOfWeek$(0) = "Sun" : DaysOfWeek$(1) = "Mon" : DaysOfWeek$(2) = "Tue"
+ DaysOfWeek$(3) = "Wed" : DaysOfWeek$(4) = "Thu" : DaysOfWeek$(5) = "Fri" : DaysOfWeek$(6) = "Sat"
+
+ For Col = 0 To 6
+   X = Col * CELL_X + 5
+   Y = 50
+   Colour caldayc
+   Print @(X, Y) DaysOfWeek$(Col)
+ Next
+
+ ' --- Calculate the number of days in the month ---
+ DaysInMonth = 31
+ If Month = 4 Or Month = 6 Or Month = 9 Or Month = 11 Then DaysInMonth = 30
+ If Month = 2 Then
+   If (Year Mod 4 = 0 And Year Mod 100 <> 0) Or (Year Mod 400 = 0) Then
+     DaysInMonth = 29
+   Else
+     DaysInMonth = 28
+   End If
+ End If
+
+ ' --- Calculate the Day of the Week for the 1st of the month using a function ---
+ FirstDayOfWeek = GetDayOfWeek(1, Month, Year) ' 0=Sun, 6=Sat
+
+ ' Draw the days
+ ' Changed font from Font 2 to Font 1 (smallest) to prevent wrapping for 2-digit numbers
+ Font 1
+ Row = 0
+ Col = FirstDayOfWeek
+
+ For Day = 1 To DaysInMonth
+   X = (Col * CELL_X) + 10
+   Y = 80 + (Row * CELL_Y)
+   'square pos
+   sx = x - 8
+   sy = y - 8
+
+   ' Highlight today's date
+   If Day = Today And Month = Val(Mid$(Date$, 4, 2)) And Year = Val(Mid$(Date$, 7, 4)) Then
+     Box sx, sy, SIZE_X, SIZE_Y, 5, todayc
+   Else
+     Box sx, sy, SIZE_X, SIZE_Y, 3, otherdayc
+   End If
+
+   Colour caldaynumc
+   Print @(X, Y) Day
+
+   Col = Col + 1
+   If Col > 6 Then
+     Col = 0
+     Row = Row + 1
+   End If
+ Next Day
+End Sub
+
+Function GetDayOfWeek(TargetD, TargetM, TargetY)
+ ' Calculates the day of the week using Zeller's Congruence variation
+ ' Returns 0 = Sunday, 6 = Saturday
+ Local h, q_val, m_val, y_val, j_val, k_val
+
+ q_val = TargetD
+ m_val = TargetM
+ y_val = TargetY
+
+ If m_val < 3 Then
+   m_val = m_val + 12
+   y_val = y_val - 1
+ End If
+
+ j_val = Int(y_val / 100)
+ k_val = y_val Mod 100
+
+ h = (q_val + Int(13 * (m_val + 1) / 5) + k_val + Int(k_val / 4) + Int(j_val / 4) - 2 * j_val) Mod 7
+
+ If h = 0 Then GetDayOfWeek = 6 Else GetDayOfWeek = h - 1
+
 End Function
