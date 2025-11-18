@@ -28,6 +28,8 @@ caldaynumc = &H8410
 otherdayc  = &H8410
 todayc     = &h00aa00
 
+knowndate = thisdate()
+
 'do we have a realtimeclock?
 haveRtc =0 '0 = no
 
@@ -44,6 +46,7 @@ Do
     drawCurrentScreen
    Case 146 '[F2]
     mode$="calendar"
+    knowndate = thisdate()
     drawCurrentScreen
    Case 151 'f7
     settime
@@ -54,6 +57,10 @@ Do
    Case 27  'esc
     Exit Do
   End Select
+ EndIf
+ If knowndate <> thisdate() And mode$="calendar" Then
+  knowndate = thisdate()
+  drawCurrentScreen
  EndIf
 Loop
 Sub tick
@@ -299,4 +306,8 @@ Function GetDayOfWeek(TargetD, TargetM, TargetY)
 
  If h = 0 Then GetDayOfWeek = 6 Else GetDayOfWeek = h - 1
 
+End Function
+
+Function thisdate()
+  thisdate = Val(Left$(Date$,2))
 End Function
