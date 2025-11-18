@@ -20,6 +20,13 @@ nsmed = 9
 nssml = 7
 nsmin = 8
 
+f1pos = 95
+f2pos = 145
+f3pos = 195
+f4pos = 255
+f5pos = 305
+
+
 'draw header
 Sub noteheader(whatnote As integer)
   headtext$ = "["
@@ -47,19 +54,16 @@ Sub notefooter(whatnote As integer)
   npagetxt$ = npagetxt$ + "/"
   npagetxt$ = npagetxt$ + Str$(nextNoteSpot(whatnote)-1)
   npagetxt$ = npagetxt$ + ">"
-  npagepos = 320-(Len(npagetxt$)*7)
-  footxt$ = "Note " + ver$
-  msgtxt$ = "[F1] or help"
-  msgpos = 160-((Len(msgtxt$)*4)/2)
-  Font (7)
+  Line 1,300,319,300,1,RGB(44,222,200)
   Color RGB(44,222,200)
-  Print @(0,304) footxt$
-  Font (8)
-  Color RGB(30,180,180)
-  Print @(msgpos,304) msgtxt$
   Font (7)
-  Color RGB(44,222,200)
-  Print @(npagepos,304) npagetxt$
+  Print @(15,304) npagetxt$
+  Font (7)
+  Print @(f1pos,304)" HELP"
+  Print @(f2pos,304)"++/REN"
+  Print @(f3pos,304)"NEW/ADD"
+  Print @(f4pos,304)"INSERT"
+  Print @(f5pos,304)"/D"
   Font (1)
 End Sub
 
