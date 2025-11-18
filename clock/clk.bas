@@ -6,6 +6,12 @@
 ' added calendar
 '
 mode$="clock"
+f1pos = 95
+f2pos = 145
+f3pos = 195
+f4pos = 255
+f5pos = 305
+
 'calendar cell size
 Const CELL_Y = 41
 Const CELL_X = 45
@@ -27,6 +33,10 @@ caldayc    = &h00aa00
 caldaynumc = &H8410
 otherdayc  = &H8410
 todayc     = &h00aa00
+
+menuc=&h00aa00
+fkeyc=&h00aa00
+fkhic=&h00dd00
 
 knowndate = thisdate()
 
@@ -91,6 +101,7 @@ Sub drawclockface
   y2=Fix(Cos(Rad(dd)) * (r+csl))
   Line x1+xo,y1+yo,x2+xo,y2+yo,3,clkc
  Next dd
+ drawfooter
 End Sub
 
 Sub drawclock
@@ -235,7 +246,7 @@ Sub DrawCalendar(Month, Year, Today)
 
  For Col = 0 To 6
    X = Col * CELL_X + 5
-   Y = 50
+   Y = 35
    Colour caldayc
    Print @(X, Y) DaysOfWeek$(Col)
  Next
@@ -262,7 +273,7 @@ Sub DrawCalendar(Month, Year, Today)
 
  For Day = 1 To DaysInMonth
    X = (Col * CELL_X) + 10
-   Y = 80 + (Row * CELL_Y)
+   Y = 60 + (Row * CELL_Y)
    'square pos
    sx = x - 8
    sy = y - 8
@@ -283,6 +294,7 @@ Sub DrawCalendar(Month, Year, Today)
      Row = Row + 1
    End If
  Next Day
+ drawfooter
 End Sub
 
 Function GetDayOfWeek(TargetD, TargetM, TargetY)
@@ -311,3 +323,29 @@ End Function
 Function thisdate()
   thisdate = Val(Left$(Date$,2))
 End Function
+
+Sub drawfooter
+  f1colour = fkeyc
+  f2colour = fkeyc
+  f3colour = fkeyc
+  f4colour = fkeyc
+  f5colour = fkeyc
+
+  If mode$="clock" Then
+   f1colour = fkhic
+  ElseIf mode$="calendar" Then
+   f2colour = fkhic
+  EndIf
+  Line 1,300,319,300,1,menuc
+  Font (7)
+  Colour f1colour
+  Print @(f1pos,304)"CLOCK"
+  Colour f2colour
+  Print @(f2pos,304)" CAL"
+  Colour f3colour
+  Print @(f3pos,304)""
+  Colour f4colour
+  Print @(f4pos,304)""
+  Colour f5colour
+  Print @(f5pos,304)""
+End Sub
