@@ -4,6 +4,7 @@
 'https://thebackshed.com/forum/ViewTopic.php?FID=16&TID=15586
 '
 ' added calendar
+' added timer alarm
 '
 mode$="clock"
 f1pos = 95
@@ -11,6 +12,10 @@ f2pos = 145
 f3pos = 195
 f4pos = 255
 f5pos = 305
+
+'timer alarm
+countdown = 0
+snoozed = 1
 
 'calendar cell size
 Const CELL_Y = 41
@@ -58,6 +63,9 @@ Do
     mode$="calendar"
     knowndate = thisdate()
     drawCurrentScreen
+   Case 148 '[f4]
+    newtimer
+    drawCurrentScreen
    Case 151 'f7
     settime
     drawCurrentScreen
@@ -68,12 +76,16 @@ Do
     Exit Do
   End Select
  EndIf
+ If cmd$ <> "" And snoozed = 0 And countdown = 0 Then
+  snooze
+ EndIf
  If knowndate <> thisdate() And mode$="calendar" Then
   knowndate = thisdate()
   drawCurrentScreen
  EndIf
 Loop
 Sub tick
+ handleTimerAlarm
  drawclock
 End Sub
 CLS
@@ -324,6 +336,63 @@ Function thisdate()
   thisdate = Val(Left$(Date$,2))
 End Function
 
+Sub handleTimerAlarm
+  If snoozed = 1 Then Exit Sub
+  If countdown > 0 Then countdown = countdown - 1
+  If countdown > 0 Then timeleft
+  If countdown = 0 Then soundalarm
+End Sub
+
+Sub newtimer
+  If countdown > 0 Or snoozed = 0 Then
+   snooze
+   Exit Sub
+  EndIf
+  CLS
+  Font (2)
+  Input "countdown (sec): ", count$
+  If isnum(count$) = 0 Then Exit Sub
+  countdown = Val(count$)
+  snoozed = 0
+End Sub
+
+Sub snooze
+  countdown = 0
+  snoozed = 1
+  Print @(15,304) "      "
+  drawfooter
+End Sub
+
+Sub timeleft
+  Font (7)
+  Colour fkeyc
+  If countdown > 0 Or snoozed = 0 Then
+   Print @(15,304) "      "
+   countmin = Int(countdown / 60)
+   countsec = countdown Mod 60
+   Print @(15,304) Str$(countmin,3,0,"0")+":"+Str$(countsec,2,0,"0")
+  EndIf
+End Sub
+
+Sub showalarm
+  Font (7)
+  Colour fkeyc
+  If Val(Right$(Time$,2)) Mod 2 = 0 Then
+    Print @(15,304) "======"
+  Else
+    Print @(15,304) "!!!!!!"
+  EndIf
+End Sub
+
+Sub soundalarm
+  showalarm
+  If Val(Right$(Time$,2)) Mod 3 = 0 Then
+    Play tone 200,600,900
+  ElseIf Val(Right$(Time$,2)) Mod 2 = 0 Then
+    Play tone 500,300,900
+  EndIf
+End Sub
+
 Sub drawfooter
   f1colour = fkeyc
   f2colour = fkeyc
@@ -336,6 +405,7 @@ Sub drawfooter
   ElseIf mode$="calendar" Then
    f2colour = fkhic
   EndIf
+  If countdown > 0 Then f4colour = fkhic
   Line 1,300,319,300,1,menuc
   Font (7)
   Colour f1colour
@@ -345,7 +415,7 @@ Sub drawfooter
   Colour f3colour
   Print @(f3pos,304)""
   Colour f4colour
-  Print @(f4pos,304)""
+  Print @(f4pos,304)" TIMER"
   Colour f5colour
   Print @(f5pos,304)""
 End Sub

@@ -29,6 +29,8 @@ F1 clock mode
 
 F2 calendar mode
 
+F4 Timer alarm on/off
+
 F7 change time
 
 F8 change date
