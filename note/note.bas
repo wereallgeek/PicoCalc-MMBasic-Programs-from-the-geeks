@@ -59,7 +59,7 @@ Sub notefooter(whatnote As integer)
   Font (7)
   Print @(15,304) npagetxt$
   Font (7)
-  Print @(f1pos,304)" HELP"
+  Print @(f1pos,304)"HLP/MV"
   Print @(f2pos,304)"++/REN"
   Print @(f3pos,304)"NEW/ADD"
   Print @(f4pos,304)"INSERT"
@@ -87,6 +87,7 @@ Sub helpscreen
   Print "[F2]       add to current note"
   Print "[F3]       New note (end of book)"
   Print "[F4]       Insert note (here)"
+  Print "[F6]       Move note (change order)"
   Print "[<-back]   delete current note"
   Print "LEFT dpad  previous note"
   Print "RIGHT dpad next note"
