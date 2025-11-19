@@ -43,6 +43,8 @@ menuc=&h00aa00
 fkeyc=&h00aa00
 fkhic=&h00dd00
 
+batc=&h1e991e
+
 knowndate = thisdate()
 
 'do we have a realtimeclock?
@@ -123,7 +125,7 @@ Sub drawclock
   m=Val(Mid$(ti$,4,2))+s/60
   h=Val(Left$(ti$,2))+m/60
   Text 0,0,Date$,l,7,2,txtc
-  Text 210,0,Day$(now)+"   ",l,7,2,txtc
+  Text 180,0,Day$(now)+"   ",l,7,2,txtc
   t=s/60
   x=xs:y=ys
   c=secc
@@ -143,9 +145,10 @@ Sub drawclock
  ElseIf mode$="calendar" Then
   Colour digiclkc
   Font 1
-  Print @(255, 5) Time$
+  Print @(255, 11) Time$
  EndIf
 End Sub
+
 Sub draws
  Line xo,yo,x+xo,y+yo,1,0
  theta=-tau*t+tau/4
@@ -393,7 +396,21 @@ Sub soundalarm
   EndIf
 End Sub
 
+Function batlevel$()
+  buildstring$ = "+"
+  If MM.Info(charging) = 0 Then buildstring$ = " "
+  buildstring$ = buildstring$ + Str$(MM.Info(battery))
+  batlevel$ = buildstring$ + "%"
+End Function
+
 Sub drawfooter
+  'batt top right isnt quite footer
+  headtext$ = batlevel$()
+  batpos = 320 - (Len(headtext$) * 7)
+  Font (7)
+  Colour batc
+  Print @(batpos,0) headtext$
+  'actual footer
   f1colour = fkeyc
   f2colour = fkeyc
   f3colour = fkeyc
