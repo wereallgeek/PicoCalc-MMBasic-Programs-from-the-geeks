@@ -867,7 +867,7 @@ Sub checkEditKey
         addInNote(notenum, getNote$(), linedit)
         loadnotes(notenum)
       Case 149 '[F5] rm
-        If lastLine(whatnote) > 1 Then
+        If lastLine(notenum) > 1 Then
           alterNote(notenum, linedit, 0)
           If linedit > 1 Then linedit = linedit - 1
           loadnotes(notenum)
