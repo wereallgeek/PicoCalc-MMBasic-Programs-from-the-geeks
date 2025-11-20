@@ -1,11 +1,12 @@
 'note editor
 filehandle = 1
+temphandle = 2
 filename$ = "notes.data"
 path$ = "b:\notes\"
 bookinfoext$ = ".inf"
 libinfofilename$ = "libinfo"
 dataext$ = ".data"
-temp$ = "notetemp"
+tempext$ = ".temp"
 note$ = ""
 notenum = 1
 notebook$ = "notebook"
@@ -19,6 +20,9 @@ nsbig = 1
 nsmed = 9
 nssml = 7
 nsmin = 8
+mode$="read"
+linedit=1
+linehigh=1
 
 f1pos = 95
 f2pos = 145
@@ -55,15 +59,40 @@ Sub notefooter(whatnote As integer)
   npagetxt$ = npagetxt$ + Str$(nextNoteSpot(whatnote)-1)
   npagetxt$ = npagetxt$ + ">"
   Line 1,300,319,300,1,RGB(44,222,200)
+  f1col = RGB(44,222,200)
+  f2col = RGB(44,222,200)
+  f3col = RGB(44,222,200)
+  f4col = RGB(44,222,200)
+  f5col = RGB(44,222,200)
   Color RGB(44,222,200)
   Font (7)
   Print @(15,304) npagetxt$
   Font (7)
-  Print @(f1pos,304)"HLP/MV"
-  Print @(f2pos,304)"++/REN"
-  Print @(f3pos,304)"NEW/ADD"
-  Print @(f4pos,304)"INSERT"
-  Print @(f5pos,304)"/D"
+  If mode$="read" Then
+    Color f1col
+    Print @(f1pos,304)"HLP/MV"
+    Color f2col
+    Print @(f2pos,304)"++/REN"
+    Color f3col
+    Print @(f3pos,304)"NEW/ADD"
+    Color f4col
+    Print @(f4pos,304)"INS/EDT"
+    Color f5col
+    Print @(f5pos,304)"/D"
+  ElseIf mode$="edit" Then
+    If linedit = lastLine(whatnote) Then f3col=RGB(24,122,100)
+    If linedit = 1 Then f1col=RGB(24,122,100)
+    Color f1col
+    Print @(f1pos,304)"UP"
+    Color f2col
+    Print @(f2pos,304)"ADDTO"
+    Color f3col
+    Print @(f3pos,304)"DOWN"
+    Color f4col
+    Print @(f4pos,304)"INS"
+    Color f5col
+    Print @(f5pos,304)"RM"
+  EndIf
   Font (1)
 End Sub
 
@@ -88,6 +117,7 @@ Sub helpscreen
   Print "[F3]       New note (end of book)"
   Print "[F4]       Insert note (here)"
   Print "[F6]       Move note (change order)"
+  Print "[F9]       edit note"
   Print "[<-back]   delete current note"
   Print "LEFT dpad  previous note"
   Print "RIGHT dpad next note"
@@ -249,12 +279,12 @@ Function bookinfo$(whatbook As integer)
 End Function
 
 'compute tempfile name
-Function tempfile$()
+Function tempfile$(whatnote As integer)
   filename$ = path$
   filename$ = filename$ + Str$(booknum)
   filename$ = filename$ + "\"
-  filename$ = filename$ + temp$
-  filename$ = filename$ + dataext$
+  filename$ = filename$ + Str$(whatnote)
+  filename$ = filename$ + tempext$
   tempfile$ = filename$
 End Function
 
@@ -318,6 +348,7 @@ Sub storelib
   Close #filehandle
 End Sub
 
+'handle changing font
 Sub fontchanged
   If lastsize <> notesize Then
     lastsize = notesize
@@ -325,6 +356,7 @@ Sub fontchanged
   EndIf
 End Sub
 
+'handle changing book
 Sub bookchanged
   If lastbook <> booknum Then
     lastbook = booknum
@@ -352,6 +384,82 @@ Sub insertNoteHere(notetoadd$ As string)
   addNoteSpotAt(notenum)
   CLS
   writeNote(notetoadd$)
+End Sub
+
+'get numbe of lines
+Function lastLine(whatnote As integer)
+  Open notefile$(whatnote) For INPUT As filehandle
+  lineread=0
+  Do While Not Eof(filehandle)
+    Line Input #filehandle, note$
+    lineread=lineread+1
+  Loop
+  Close #filehandle
+  lastLine = lineread
+End Function
+
+'get specific line
+Function getLine$(whatnote As integer, lineNum As integer)
+  Open notefile$(whatnote) For INPUT As filehandle
+  lineread=1
+  getLine$=""
+  Do While Not Eof(filehandle)
+    Line Input #filehandle, note$
+    If lineread=lineNum Then
+      getLine$=note$
+    EndIf
+    lineread=lineread+1
+  Loop
+  Close #filehandle
+End Function
+
+'add text within note
+Sub addInNote(whatnote As integer, lineToAdd$ As string, lineTo As integer)
+  Open tempfile$(whatnote) For append As temphandle
+  Open notefile$(whatnote) For INPUT As filehandle
+    lineread=1
+    Do While Not Eof(filehandle)
+      Line Input #filehandle, note$
+      If lineread=lineTo Then
+        Print #temphandle, lineToAdd$
+      EndIf
+      Print #temphandle, note$
+      lineread=lineread+1
+    Loop
+  Close #filehandle
+  Close #temphandle
+
+  Kill notefile$(whatnote)
+  Rename tempfile$(whatnote) As notefile$(whatnote)
+End Sub
+
+'alter note--swap two lines
+Sub alterNote(whatnote As integer, lineFrom As integer, lineTo As integer)
+  lineinsert = lineTo
+  If lineFrom < lineTo Then lineinsert = lineTo + 1
+  addAfter = 0
+  If lineTo = lastLine(whatnote) Then addAfter = 1
+  lineToMove$=getLine$(whatnote,lineFrom)
+
+  Open tempfile$(whatnote) For append As temphandle
+  Open notefile$(whatnote) For INPUT As filehandle
+    lineread=1
+    Do While Not Eof(filehandle)
+      Line Input #filehandle, note$
+      If lineread=lineinsert Then
+        Print #temphandle, lineToMove$
+      EndIf
+      If lineread<>lineFrom Then
+        Print #temphandle, note$
+      EndIf
+      lineread=lineread+1
+    Loop
+    If addAfter = 1 Then Print #temphandle, lineToMove$
+  Close #filehandle
+  Close #temphandle
+
+  Kill notefile$(whatnote)
+  Rename tempfile$(whatnote) As notefile$(whatnote)
 End Sub
 
 'create library
@@ -439,10 +547,20 @@ Sub loadnotetext(whatnote As integer)
     ' load existing notes from file
     Font (notesize)
     Open notefile$(whatnote) For INPUT As filehandle
+    linehigh=1
     Do While Not Eof(filehandle)
       Line Input #filehandle, note$
-      Color RGB(200,200,200)
+      If mode$ <> "read" And linehigh=linedit Then
+        Color RGB(220,220,000)
+      Else
+        Color RGB(200,200,200)
+      EndIf
+      If mode$ <> "read" And note$ = "" And linehigh=linedit Then
+        note$="<empty line>"
+        Color RGB(200,200,20)
+      EndIf
       Print note$
+      linehigh=linehigh+1
     Loop
     Close #filehandle
   EndIf
@@ -699,20 +817,70 @@ Sub smallerfont
   loadnotes(notenum)
 End Sub
 
-'begin here
-createlibrary
-'get last book + validate
-createbook(lastbook)
-loadnotes(notenum)
-Do
+Sub newmode(inmode$ As string)
+  mode$=inmode$
+  linedit = 1
+  loadnotes(notenum)
+End Sub
+
+Sub checkkey
+  If mode$="read" Then
+    checkReadKey
+  ElseIf mode$="edit" Then
+    checkEditKey
+  EndIf
+End Sub
+
+Sub checkEditKey
   cmd$ = Inkey$
   If cmd$ <> "" Then
     Select Case Asc(cmd$)
-      Case 144 '[F2] add to note
+      Case 27 'ESC
+        newmode("read")
+      Case 128 'up
+        If linedit>1 Then
+          linedit = linedit - 1
+          loadnotes(notenum)
+        EndIf
+      Case 129 'down
+        If linedit < lastLine(notenum) Then
+          linedit = linedit + 1
+          loadnotes(notenum)
+        EndIf
+      Case 145 '[F1] move up
+        If linedit > 1 Then
+          alterNote(notenum, linedit, linedit - 1)
+          linedit = linedit - 1
+          loadnotes(notenum)
+        EndIf
+      Case 146 '[F2] add to
+        addtonote
+      Case 147 '[F3] move dn
+        If linedit < lastLine(notenum) Then
+          alterNote(notenum, linedit, linedit + 1)
+          linedit = linedit + 1
+          loadnotes(notenum)
+        EndIf
+      Case 148 '[F4] insert
+        CLS
+        addInNote(notenum, getNote$(), linedit)
+        loadnotes(notenum)
+      Case 149 '[F5] rm
+        alterNote(notenum, linedit, 0)
+        loadnotes(notenum)
+     End Select
+  EndIf
+End Sub
+
+Sub checkReadKey
+  cmd$ = Inkey$
+  If cmd$ <> "" Then
+    Select Case Asc(cmd$)
+      Case 146 '[F2] add to note
         addtonote
       Case 97 '[A]dd to note
         addtonote
-      Case 146 '[F4] insert
+      Case 148 '[F4] insert
         insertnote
       Case 105 '[I]nsert
         insertnote
@@ -722,6 +890,22 @@ Do
         newnote
       Case 8 '[<-BACK]
         askDelete
+      Case 134 '[HOME] (shift-tab)
+        first
+      Case 135 '[END] (shift-del)
+        last
+      Case 128 'up
+        up
+      Case 136 'shift-up
+        shiftup
+      Case 129 'down
+        down
+      Case 137 'shift-down
+        shiftdown
+      Case 131 'right
+        right
+      Case 130 'left
+        left
       Case 134 '[HOME] (shift-tab)
         first
       Case 135 '[END] (shift-del)
@@ -748,6 +932,8 @@ Do
         renamebook
       Case 152 '[F8] add a book
         createloadbook
+      Case 153 '[F9] edit note mode
+        newmode("edit")
       Case 154 '[F10] add a book
         askDebook
       Case 43 'shift-[+]
@@ -760,6 +946,15 @@ Do
         Exit Do
     End Select
   EndIf
+End Sub
+
+'begin here
+createlibrary
+'get last book + validate
+createbook(lastbook)
+loadnotes(notenum)
+Do
+  checkkey
 Loop
 CLS
 End
