@@ -82,6 +82,7 @@ Sub notefooter(whatnote As integer)
   ElseIf mode$="edit" Then
     If linedit = lastLine(whatnote) Then f3col=RGB(24,122,100)
     If linedit = 1 Then f1col=RGB(24,122,100)
+    If lastLine(whatnote) < 2 Then f5col=RGB(24,122,100)
     Color f1col
     Print @(f1pos,304)"UP"
     Color f2col
@@ -866,8 +867,11 @@ Sub checkEditKey
         addInNote(notenum, getNote$(), linedit)
         loadnotes(notenum)
       Case 149 '[F5] rm
-        alterNote(notenum, linedit, 0)
-        loadnotes(notenum)
+        If lastLine(whatnote) > 1 Then
+          alterNote(notenum, linedit, 0)
+          If linedit > 1 Then linedit = linedit - 1
+          loadnotes(notenum)
+        EndIf
      End Select
   EndIf
 End Sub
