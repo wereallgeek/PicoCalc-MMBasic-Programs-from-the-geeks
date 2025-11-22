@@ -23,6 +23,7 @@ nsmin = 8
 mode$="read"
 linedit=1
 linehigh=1
+mark$="*-"
 
 f1pos = 95
 f2pos = 145
@@ -413,6 +414,34 @@ Function getLine$(whatnote As integer, lineNum As integer)
   Loop
   Close #filehandle
 End Function
+
+'mark current line
+'add text within note
+Sub markNote(whatnote As integer, lineToMark As integer)
+  Open tempfile$(whatnote) For append As temphandle
+  Open notefile$(whatnote) For INPUT As filehandle
+    lineread=1
+    Do While Not Eof(filehandle)
+      Line Input #filehandle, note$
+      If lineread=lineToMark Then
+        marklen = Len(mark$)
+        notelen = Len(note$)
+        If notelen > marklen And Left$(note$, marklen) = mark$ Then
+          Print #temphandle, Right$(note$, (notelen - marklen))
+        Else
+          Print #temphandle, mark$ + note$
+        EndIf
+      Else
+        Print #temphandle, note$
+      EndIf
+      lineread=lineread+1
+    Loop
+  Close #filehandle
+  Close #temphandle
+
+  Kill notefile$(whatnote)
+  Rename tempfile$(whatnote) As notefile$(whatnote)
+End Sub
 
 'add text within note
 Sub addInNote(whatnote As integer, lineToAdd$ As string, lineTo As integer)
@@ -872,6 +901,9 @@ Sub checkEditKey
           If linedit > 1 Then linedit = linedit - 1
           loadnotes(notenum)
         EndIf
+      Case 9 '[TAB]
+        markNote(notenum, linedit)
+        loadnotes(notenum)
      End Select
   EndIf
 End Sub
