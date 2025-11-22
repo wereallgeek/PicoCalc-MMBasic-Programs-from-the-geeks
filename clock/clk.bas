@@ -65,6 +65,34 @@ Do
     mode$="calendar"
     knowndate = thisdate()
     drawCurrentScreen
+   Case 128 'up'
+    If mode$="calendar" Then
+      CalYear = CalYear + 1
+      DrawCalendar CalMonth, CalYear, CalDay
+    EndIf
+   Case 129 'down'
+    If mode$="calendar" Then
+      CalYear = CalYear - 1
+      DrawCalendar CalMonth, CalYear, CalDay
+    EndIf
+   Case 130 'left'
+    If mode$="calendar" Then
+      If CalMonth > 1 Then
+        CalMonth = CalMonth - 1
+      Else
+        CalMonth = 12
+      EndIf
+      DrawCalendar CalMonth, CalYear, CalDay
+    EndIf
+   Case 131 'right'
+    If mode$="calendar" Then
+      If CalMonth < 12 Then
+        CalMonth = CalMonth + 1
+      Else
+        CalMonth = 1
+      EndIf
+      DrawCalendar CalMonth, CalYear, CalDay
+    EndIf
    Case 148 '[f4]
     newtimer
     drawCurrentScreen
@@ -228,12 +256,12 @@ End Function
 
 Sub drawCurrentCalendar
  ' Get current date components (as numbers)
- CurrentDay = Val(Mid$(Date$, 1, 2))
- CurrentMonth = Val(Mid$(Date$, 4, 2))
- CurrentYear = Val(Mid$(Date$, 7, 4))
+ CalDay = Val(Mid$(Date$, 1, 2))
+ CalMonth = Val(Mid$(Date$, 4, 2))
+ CalYear = Val(Mid$(Date$, 7, 4))
 
- ' Draw the calendar for the current month
- DrawCalendar CurrentMonth, CurrentYear, CurrentDay
+ ' Draw the calendar
+ DrawCalendar CalMonth, CalYear, CalDay
 End Sub
 
 Sub DrawCalendar(Month, Year, Today)
