@@ -57,7 +57,6 @@ Do
  cmd$ = Inkey$
  If cmd$ <> "" Then
   Select Case Asc(cmd$)
-  drawCurrentCalendar
    Case 145 '[F1]
     mode$="clock"
     drawCurrentScreen
