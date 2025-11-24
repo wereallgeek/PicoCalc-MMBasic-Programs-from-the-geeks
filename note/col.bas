@@ -128,14 +128,14 @@ seltxt$ = ""
 
 'color picker
 rgbrx = 60
-rgbry = 120
+rgbry = 94
 rgbgx = 130
-rgbgy = 120
+rgbgy = 94
 rgbbx = 200
-rgbby = 120
+rgbby = 94
 rgbtxtx = 50
 rgbtxty = 190
-rgbaupy = 100
+rgbaupy = 70
 rgbadny = 160
 
 cur_r = 120
@@ -410,8 +410,11 @@ Sub drawCurRgb
  Font (3)
  Colour RGB(190,190,190)
  Print @(rgbrx,rgbry) Str$(cur_r,3,0,"0")
+ Print @(rgbrx+9,rgbry+25) Hex$(cur_r)
  Print @(rgbgx,rgbgy) Str$(cur_g,3,0,"0")
+ Print @(rgbgx+9,rgbgy+25) Hex$(cur_g)
  Print @(rgbbx,rgbby) Str$(cur_b,3,0,"0")
+ Print @(rgbbx+9,rgbby+30) Hex$(cur_b)
  Colour RGB(cur_r,cur_g,cur_b)
  Print @(rgbtxtx,rgbtxty) "selected color"
 End Sub
@@ -424,12 +427,14 @@ Sub onearrow(pointingup)
     adir = -1
     arwy = rgbaupy
   EndIf
-  arsiz = 8 * adir
-  arwx = rgbselpos() + 25
-  arwcol = RGB(255,255,255)
-  Line arwx,arwy+arsiz,arwx-arsiz,arwy-arsiz,2,arwcol
-  Line arwx-arsiz,arwy-arsiz,arwx+arsiz,arwy-arsiz,2,arwcol
-  Line arwx+arsiz,arwy-arsiz,arwx,arwy+arsiz,2,arwcol
+  For trindex = 0 To 10
+    arsiz = trindex * adir
+    arwx = rgbselpos() + 25
+    arwcol = RGB(190,190,190)
+    Line arwx,arwy+arsiz,arwx-arsiz,arwy-arsiz,1,arwcol
+    Line arwx-arsiz,arwy-arsiz,arwx+arsiz,arwy-arsiz,1,arwcol
+    Line arwx+arsiz,arwy-arsiz,arwx,arwy+arsiz,1,arwcol
+  Next
 End Sub
 
 'arrows
@@ -536,7 +541,7 @@ Sub handlekey
        storelib
        Color 0,0
        CLS
-	   run "note.bas"
+    Run "note.bas"
     End Select
   EndIf
 End Sub
