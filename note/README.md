@@ -22,6 +22,9 @@ The program will create a notes folder at the root of the SD card. The path is w
 It will store each note (numbered) as a file with .data extension in a notebook (collection) subfolder. It is plain text.
 Each subfolder (notebook) will have a .info file for data storage.
 
+### companion COL.BAS utility
+A companion app col.bat is used to configure colors on the note editor. I can be run on its own or launched with ALT-C. ESC will save and exit.
+
 
 ### KEYS
 F1 shows an help screen
@@ -43,6 +46,8 @@ Left/right/home/end  navigate notes
 up/down navigate notebooks
 
 shift +/shift - to change note fontsize
+
+ALT-C for Color Configuration utility (save and exit with ESC)
 
 
 

@@ -40,10 +40,10 @@ Sub noteheader(whatnote As integer)
   headbat$ = batlevel$()
   batpos = 320-(Len(headbat$)*7)
   Font (7)
-  Color RGB(44,222,200)
+  Color colheader
   Print @(0,0) headtext$
   Font (7)
-  Color RGB(30,180,180)
+  Color colbat
   Print @(batpos,0) headbat$
   Font (1)
 End Sub
@@ -59,13 +59,13 @@ Sub notefooter(whatnote As integer)
   npagetxt$ = npagetxt$ + "/"
   npagetxt$ = npagetxt$ + Str$(nextNoteSpot(whatnote)-1)
   npagetxt$ = npagetxt$ + ">"
-  Line 1,300,319,300,1,RGB(44,222,200)
-  f1col = RGB(44,222,200)
-  f2col = RGB(44,222,200)
-  f3col = RGB(44,222,200)
-  f4col = RGB(44,222,200)
-  f5col = RGB(44,222,200)
-  Color RGB(44,222,200)
+  Line 1,300,319,300,1,colfkey
+  f1col = colfkey
+  f2col = colfkey
+  f3col = colfkey
+  f4col = colfkey
+  f5col = colfkey
+  Color colfkey
   Font (7)
   Print @(15,304) npagetxt$
   Font (7)
@@ -81,9 +81,9 @@ Sub notefooter(whatnote As integer)
     Color f5col
     Print @(f5pos,304)"/D"
   ElseIf mode$="edit" Then
-    If linedit = lastLine(whatnote) Then f3col=RGB(24,122,100)
-    If linedit = 1 Then f1col=RGB(24,122,100)
-    If lastLine(whatnote) < 2 Then f5col=RGB(24,122,100)
+    If linedit = lastLine(whatnote) Then f3col=colfhig
+    If linedit = 1 Then f1col=colfhig
+    If lastLine(whatnote) < 2 Then f5col=colfhig
     Color f1col
     Print @(f1pos,304)"UP"
     Color f2col
@@ -100,7 +100,7 @@ End Sub
 
 'draw helpscreen
 Sub helpscreen
-  Color RGB(230,180,55)
+  Color colhelp
   CLS
   Font (1)
   Print "  *** PicCalc simple notepad " + ver$ + " ***"
@@ -110,7 +110,6 @@ Sub helpscreen
   Print "stores notes in files in the folder:"
   Font (1)
   Print path$
-  Print ""
   Print ""
   Font (9)
   Print "To Use:"
@@ -128,6 +127,7 @@ Sub helpscreen
   Print "UP/DOWN    change book"
   Print ""
   Print "shift[+/-] change note font size"
+  Print "[ALT]-[C]  Color configuration tool"
   Print ""
   Print "[F7]       rename current book"
   Print "[F8]       add a book"
@@ -146,13 +146,13 @@ End Sub
 'ask to delete book
 Sub askDebook
   CLS
-  Color RGB(240,40,40)
+  Color colask
   Font (1)
   Print "delete book "
-  Color RGB(30,180,180)
+  Color colheader
   Font (7)
   Print notebook$
-  Color RGB(240,40,40)
+  Color colask
   Font (1)
   Print " (Y/N) ?"
   cmd$ = Inkey$
@@ -192,7 +192,7 @@ Sub askDelete
   Font (notesize)
   loadnotetext(notenum)
   Font (1)
-  Color RGB(240,80,40)
+  Color colask
   Print "delete note #" + Str$(notenum) + " (Y/N) ?"
   cmd$ = Inkey$
   Do While cmd$ = ""
@@ -231,7 +231,7 @@ Sub askmove
     moveq$ = moveq$ + " "
   EndIf
   moveq$ = moveq$ + ") ?"
-  Color RGB(240,80,40)
+  Color colask
   Print moveq$
   Do
     cmd$ = Inkey$
@@ -254,6 +254,15 @@ Sub askmove
   Loop
   loadnotes(notenum)
 End Sub
+
+'convert hex string to color
+'will return black if string is invalid
+Function hex2col(colorrgb$)
+  hex2col=0
+  If Len(colorrgb$) = 6 Then
+    hex2col=Val("&h"+colorrgb$)
+  EndIf
+End Function
 
 'Compute battery info
 Function batlevel$()
@@ -343,11 +352,22 @@ Sub writeBookinfo(infotoadd$ As string)
   Close #filehandle
 End Sub
 
+'store main data to file
 Sub storelib
   Open libinfo$() For output As filehandle
     Print #filehandle, Str$(lastbook)
     Print #filehandle, Str$(notesize)
-  Close #filehandle
+    Print #filehandle, Hex$(colheader)
+    Print #filehandle, Hex$(colbat)
+    Print #filehandle, Hex$(colfkey)
+    Print #filehandle, Hex$(colfhig)
+    Print #filehandle, Hex$(colpage)
+    Print #filehandle, Hex$(coltxt)
+    Print #filehandle, Hex$(colhig)
+    Print #filehandle, Hex$(colhhl)
+    Print #filehandle, Hex$(colhelp)
+    Print #filehandle, Hex$(colask)
+   Close #filehandle
 End Sub
 
 'handle changing font
@@ -530,6 +550,7 @@ Sub createloadbook
   loadnotes(notenum)
 End Sub
 
+'get main data fron file
 Sub getlibinfo
   somebook$ = "1"
   somesize$ = Str$(nsmed)
@@ -537,11 +558,32 @@ Sub getlibinfo
     Open libinfo$() For INPUT As filehandle
     Line Input #filehandle, somebook$
     Line Input #filehandle, somesize$
+    Line Input #filehandle, intxtheader$
+    Line Input #filehandle, intxtbat$
+    Line Input #filehandle, intxtfkey$
+    Line Input #filehandle, intxtfhig$
+    Line Input #filehandle, intxtpage$
+    Line Input #filehandle, intxttxt$
+    Line Input #filehandle, intxthig$
+    Line Input #filehandle, intxthhl$
+    Line Input #filehandle, intxthelp$
+    Line Input #filehandle, intxtask$
+    'read 7 color data
     Close #filehandle
   EndIf
   lastbook = Val(somebook$)
   notesize = Val(somesize$)
   lastsize = notesize
+  If hex2col(intxtheader$)<>0 Then colheader=hex2col(intxtheader$)
+  If hex2col(intxtbat$)<>0 Then colbat=hex2col(intxtbat$)
+  If hex2col(intxtfkey$)<>0 Then colfkey=hex2col(intxtfkey$)
+  If hex2col(intxtfhig$)<>0 Then colfhig=hex2col(intxtfhig$)
+  If hex2col(intxtpage$)<>0 Then colpage=hex2col(intxtpage$)
+  If hex2col(intxttxt$)<>0 Then coltxt=hex2col(intxttxt$)
+  If hex2col(intxthig$)<>0 Then colhig=hex2col(intxthig$)
+  If hex2col(intxthhl$)<>0 Then colhhl=hex2col(intxthhl$)
+  If hex2col(intxthelp$)<>0 Then colhelp=hex2col(intxthelp$)
+  If hex2col(intxtask$)<>0 Then colask=hex2col(intxtask$)
 End Sub
 
 'load bookinfo
@@ -581,13 +623,13 @@ Sub loadnotetext(whatnote As integer)
     Do While Not Eof(filehandle)
       Line Input #filehandle, note$
       If mode$ <> "read" And linehigh=linedit Then
-        Color RGB(220,220,000)
+        Color colhig
       Else
-        Color RGB(200,200,200)
+        Color coltxt
       EndIf
       If mode$ <> "read" And note$ = "" And linehigh=linedit Then
         note$="<empty line>"
-        Color RGB(200,200,20)
+        Color colhhl
       EndIf
       Print note$
       linehigh=linehigh+1
@@ -676,9 +718,9 @@ End Sub
 
 'get book name
 Function getBookname$()
-  Color RGB(40,240,40)
+  Color colask
   Print "Name of the notebook"
-  Color RGB(240,240,240)
+  Color colheaderr
   Font (7)
   Line Input bookname$
   titlen = Len(bookname$)
@@ -692,14 +734,14 @@ End Function
 'rename current book
 Sub renamebook
   CLS
-  Color RGB(240,120,80)
+  Color colask
   Font (1)
   Print "Rename book."
   Print "current name is : "
-  Color RGB(30,180,180)
+  Color coltxt
   Font (7)
   Print notebook$
-  Color RGB(240,120,80)
+  Color colheader
   Font (1)
   notebook$ = getBookname$()
   writeBookinfo(notebook$)
@@ -708,9 +750,9 @@ End Sub
 
 'data to note
 Function getNote$()
-  Color RGB(40,240,40)
+  Color colask
   Print "text to note"
-  Color RGB(240,240,240)
+  Color coltxt
   Font (notesize)
   Line Input getNote$
   Font (1)
@@ -980,6 +1022,10 @@ Sub checkReadKey
         Exit Do
       Case 27 'ESC
         Exit Do
+   Case 67 'ALT-C = configure
+       Color 0,0
+       CLS
+    Run "col.bas"
     End Select
   EndIf
 End Sub
