@@ -75,7 +75,7 @@ Sub notefooter(whatnote As integer)
     Color f2col
     Print @(f2pos,304)"++/REN"
     Color f3col
-    Print @(f3pos,304)"NEW/ADD"
+    Print @(f3pos,304)"NEW/BOOK"
     Color f4col
     Print @(f4pos,304)"INS/EDT"
     Color f5col
@@ -720,7 +720,7 @@ End Sub
 Function getBookname$()
   Color colask
   Print "Name of the notebook"
-  Color colheaderr
+  Color colheader
   Font (7)
   Line Input bookname$
   titlen = Len(bookname$)
