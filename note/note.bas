@@ -112,7 +112,7 @@ End Sub
 
 'draw helpscreen
 Sub helpscreen
-  Color colhelp
+  Color colhelp, bgcolor
   CLS
   Font (1)
   Print "  *** PicCalc simple notepad " + ver$ + " ***"
@@ -157,6 +157,7 @@ End Sub
 
 'ask to delete book
 Sub askDebook
+  Color bgcolor, bgcolor
   CLS
   Color colask
   Font (1)
@@ -200,6 +201,7 @@ End Sub
 
 'ask to delete note
 Sub askDelete
+  Color bgcolor, bgcolor
   CLS
   Font (notesize)
   loadnotetext(notenum)
@@ -222,6 +224,7 @@ Sub askmove
   If notenum = nextBookSpot(notenum) Then
     Exit Sub
   EndIf
+  Color bgcolor, bgcolor
   CLS
   okleft = 0
   okright = 0
@@ -409,6 +412,7 @@ End Sub
 'add new note at the end
 Sub addnote(notetoadd$ As string)
   notenum = nextNoteSpot(notenum)
+  Color bgcolor, bgcolor
   CLS
   writeNote(notetoadd$)
 End Sub
@@ -416,6 +420,7 @@ End Sub
 'move notes to add one here
 Sub insertNoteHere(notetoadd$ As string)
   addNoteSpotAt(notenum)
+  Color bgcolor, bgcolor
   CLS
   writeNote(notetoadd$)
 End Sub
@@ -559,6 +564,7 @@ End Sub
 
 'create and load book
 Sub createloadbook
+  Color bgcolor, bgcolor
   CLS
   createbook(nextBookSpot(booknum))
   bookchanged
@@ -583,7 +589,7 @@ Sub getlibinfo
     Line Input #filehandle, intxthhl$
     Line Input #filehandle, intxthelp$
     Line Input #filehandle, intxtask$
-    'read 7 color data
+    Line Input #filehandle, intxtbgcol$
     Close #filehandle
   EndIf
   lastbook = Val(somebook$)
@@ -599,6 +605,7 @@ Sub getlibinfo
   If hex2col(intxthhl$)<>0 Then colhhl=hex2col(intxthhl$)
   If hex2col(intxthelp$)<>0 Then colhelp=hex2col(intxthelp$)
   If hex2col(intxtask$)<>0 Then colask=hex2col(intxtask$)
+  If hex2col(intxtbgcol$)<>0 Then bgcolor=hex2col(intxtbgcol$)
 End Sub
 
 'load bookinfo
@@ -622,6 +629,7 @@ End Sub
 
 'load and display the note
 Sub loadnotes(whatnote As integer)
+  Color bgcolor, bgcolor
   CLS
   noteheader(whatnote)
   loadnotetext(whatnote)
@@ -756,6 +764,7 @@ End Function
 
 'rename current book
 Sub renamebook
+  Color bgcolor, bgcolor
   CLS
   Color colask
   Font (1)
@@ -790,18 +799,21 @@ End Sub
 
 'add new note
 Sub newnote
+  Color bgcolor, bgcolor
   CLS
   addnote(getNote$())
 End Sub
 
 'add note at curent location
 Sub insertNote
+  Color bgcolor, bgcolor
   CLS
   insertNoteHere(getNote$())
 End Sub
 
 'add to existing note
 Sub addtonote
+  Color bgcolor, bgcolor
   CLS
   loadnotetext(notenum)
   writeNote(getNote$())
@@ -957,6 +969,7 @@ Sub checkEditKey
           loadnotes(notenum)
         EndIf
       Case 148 '[F4] insert
+        Color bgcolor, bgcolor
         CLS
         addInNote(notenum, getNote$(), linedit)
         loadnotes(notenum)
@@ -1046,7 +1059,7 @@ Sub checkReadKey
       Case 27 'ESC
         Exit Do
    Case 67 'ALT-C = configure
-       Color 0,0
+       Color bgcolor, bgcolor
        CLS
     Run "col.bas"
     End Select
@@ -1061,5 +1074,6 @@ loadnotes(notenum)
 Do
   checkkey
 Loop
+Color RGB(green),RGB(black)
 CLS
 End
