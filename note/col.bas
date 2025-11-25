@@ -31,6 +31,7 @@ Sub storelib
     Print #filehandle, Hex$(colhhl)
     Print #filehandle, Hex$(colhelp)
     Print #filehandle, Hex$(colask)
+    Print #filehandle, Hex$(bgcolor)
    Close #filehandle
 End Sub
 
@@ -51,6 +52,7 @@ Sub getlibinfo
     Line Input #filehandle, intxthhl$
     Line Input #filehandle, intxthelp$
     Line Input #filehandle, intxtask$
+    Line Input #filehandle, intxtbgcol$
     'read 7 color data
     Close #filehandle
   EndIf
@@ -67,10 +69,12 @@ Sub getlibinfo
   If hex2col(intxthhl$)<>0 Then colhhl=hex2col(intxthhl$)
   If hex2col(intxthelp$)<>0 Then colhelp=hex2col(intxthelp$)
   If hex2col(intxtask$)<>0 Then colask=hex2col(intxtask$)
+  If hex2col(intxtbgcol$)<>0 Then bgcolor=hex2col(intxtbgcol$)
 End Sub
 
 'color editor
-colEditMaxIndex = 10
+bgcolindex      = 11
+colEditMaxIndex = 11
 colheader = &h2cdec8
 colbat    = &h1eb4b4
 colfkey   = &h2cdec8
@@ -81,6 +85,7 @@ colhig    = &hdcdc00
 colhhl    = &hc8c814
 colhelp   = &he68437
 colask    = &hf02828
+bgcolor   = &h000000
 
 headx = 0
 heady = 0
@@ -102,6 +107,9 @@ helpx = mainx
 helpy = 50
 pagex = 20
 pagey = 304
+bgcolx= 60
+bgcoly= 135
+bgcolsz= 2
 headsz = 7
 battsz = 7
 fkeysz = 7
@@ -118,6 +126,7 @@ fkhitxt$ = "disabled [f]key"
 pagetxt$ = "<page>"
 asktxt$  = "Asking questions"
 helptxt$ = "Text of the help page"
+bgcoltxt$= "<Background Color>"
 
 notesize=1
 editsel = 1
@@ -154,6 +163,7 @@ End Sub
 
 'draw the color edit screen
 Sub colEditScreen
+  Color bgcolor, bgcolor
   CLS
   'head
   Font (headsz)
@@ -182,14 +192,20 @@ Sub colEditScreen
   Print asktxt$
   Color colhelp
   Print helptxt$
+  'bg
+  Font (bgcolsz)
+  Color coltxt
+  Print @(bgcolx,bgcoly) bgcoltxt$
 End Sub
 
 Function editflash(curtxt$, curcol, posx, posy, flshst)
+  fgcolor = curcol
+  If fgcolor = bgcolor Then fgcolor = coltxt
   If flshst = 1 Then
-    Color curcol, RGB(black)
+    Color fgcolor, bgcolor
     editflash = 0
   Else
-    Color RGB(black), curcol
+    Color bgcolor, fgcolor
     editflash = 1
   EndIf
   Font (txtsize())
@@ -227,6 +243,8 @@ Function txtposx()
       txtposx = fkhix
     Case 10 'f-keys
       txtposx = fkeyx
+    Case 11 'bg
+      txtposx = bgcolx
   End Select
 End Function
 
@@ -258,6 +276,8 @@ Function linposy(selindex)
       linposy = fkhiy
     Case 10 'f-keys
       linposy = fkeyy
+    Case 11 'bg
+      linposy = bgcoly
   End Select
 End Function
 
@@ -289,6 +309,8 @@ Function fntcol(cursel)
       fntcol = colfhig
     Case 10 'f-keys
       fntcol = colfkey
+    Case 11 'bg
+      fntcol = bgcolor
   End Select
 End Function
 
@@ -321,6 +343,8 @@ Sub setfntcol(cursel, whatcolor)
       colfhig = whatcolor
     Case 10 'f-keys
       colfkey = whatcolor
+    Case 11 'bg
+      bgcolor = whatcolor
   End Select
 End Sub
 
@@ -352,6 +376,8 @@ Function fntsize(fontindex)
       fntsize = fkhisz
     Case 10 'f-keys
       fntsize = fkeysz
+    Case 11 'bg
+      fntsize = bgcolsz
   End Select
 End Function
 
@@ -386,6 +412,8 @@ Function title$()
       title$ = fkhitxt$
     Case 10 'f-keys
       title$ = fkeytxt$
+    Case 11 'bg
+      title$ = bgcoltxt$
   End Select
 End Function
 
@@ -415,7 +443,11 @@ Sub drawCurRgb
  Print @(rgbgx+9,rgbgy+25) Hex$(cur_g)
  Print @(rgbbx,rgbby) Str$(cur_b,3,0,"0")
  Print @(rgbbx+9,rgbby+30) Hex$(cur_b)
- Colour RGB(cur_r,cur_g,cur_b)
+ If colEditIndex = bgcolindex Then
+  Colour coltxt, RGB(cur_r,cur_g,cur_b)
+ Else
+  Colour RGB(cur_r,cur_g,cur_b)
+ EndIf
  Print @(rgbtxtx,rgbtxty) "selected color"
 End Sub
 
@@ -473,7 +505,11 @@ Sub rgbsel(amnt)
 End Sub
 
 Sub redrawRgbPicker
-  Colour RGB(0,0,0), RGB(0,0,0)
+  cur_back = bgcolor
+  If colEditIndex = bgcolindex Then
+    cur_back = RGB(cur_r,cur_g,cur_b)
+  EndIf
+  Colour cur_back, cur_back
   CLS
   drawCurrgb
   rgbselarrow
@@ -539,9 +575,9 @@ Sub handlekey
        colEditScreen 'redraw
      Case 27'[ESC]
        storelib
-       Color 0,0
+       Color bgcolor, bgcolor
        CLS
-    Run "note.bas"
+       Run "note.bas"
     End Select
   EndIf
 End Sub
