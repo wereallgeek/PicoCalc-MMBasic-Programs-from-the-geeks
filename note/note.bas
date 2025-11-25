@@ -23,7 +23,19 @@ nsmin = 8
 mode$="read"
 linedit=1
 linehigh=1
-mark$="*-"
+mark$=Chr$(26)
+
+bgcolor   = &h000000
+colheader = &h2cdec8
+colbat    = &h1eb4b4
+colfkey   = &h2cdec8
+colfhig   = &h187a64
+colpage   = &h2cdec8
+coltxt    = &hc8c8c8
+colhig    = &hdcdc00
+colhhl    = &hc8c814
+colhelp   = &he68437
+colask    = &hf02828
 
 f1pos = 95
 f2pos = 145
@@ -436,7 +448,6 @@ Function getLine$(whatnote As integer, lineNum As integer)
 End Function
 
 'mark current line
-'add text within note
 Sub markNote(whatnote As integer, lineToMark As integer)
   Open tempfile$(whatnote) For append As temphandle
   Open notefile$(whatnote) For INPUT As filehandle
@@ -446,10 +457,14 @@ Sub markNote(whatnote As integer, lineToMark As integer)
       If lineread=lineToMark Then
         marklen = Len(mark$)
         notelen = Len(note$)
-        If notelen > marklen And Left$(note$, marklen) = mark$ Then
-          Print #temphandle, Right$(note$, (notelen - marklen))
+        If notelen > marklen Then
+          If Left$(note$, marklen) = mark$ Then
+            Print #temphandle, Right$(note$, (notelen - marklen))
+          Else
+            Print #temphandle, mark$ + note$
+          EndIf
         Else
-          Print #temphandle, mark$ + note$
+          Print #temphandle, note$
         EndIf
       Else
         Print #temphandle, note$
@@ -631,7 +646,15 @@ Sub loadnotetext(whatnote As integer)
         note$="<empty line>"
         Color colhhl
       EndIf
+      marklen = Len(mark$)
+      notefluo = Len(note$)-marklen
+      revertcolor = MM.Info(fcolour)
+      If Left$(note$, marklen) = mark$ Then
+        Color bgcolor, revertcolor
+        note$ = Right$(note$, notefluo)
+      EndIf
       Print note$
+      Color revertcolor, bgcolor
       linehigh=linehigh+1
     Loop
     Close #filehandle
