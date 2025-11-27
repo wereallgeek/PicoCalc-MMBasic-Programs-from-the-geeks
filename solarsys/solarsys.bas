@@ -2,12 +2,17 @@
 ' Based on Python project https://github.com/dr-mod/pico-solar-system
 ' which uses the planetry equations of motion from http://stjarnhimlen.se/comp/tutorial.html
 ' I have limited the year between 1901 and 2100 as the equations may not work beyond these.
-' Touch points are
-' Top Left     = Brightness up
-' Bottom Left  = Brightness down
-' Top Right    = increase date by a week at a time then a month...
-' Bottom Right = decrease date by a week at a time then a month...
-' Centre       = reset back to todays date, also re-initialise LCD display
+' 
+' modified from its original form to work on the picocalc
+' changes only include new screen size of 320x320 and replacement of touch interface with keyboard.
+'
+' Keys:
+' +            = Brightness up
+' -            = Brightness down
+' ,<           = increase date by a week at a time then a month...
+' .>           = decrease date by a week at a time then a month...
+' <-Back       = reset back to todays date, also re-initialise LCD display
+' ESC          = Exit program
 '
 ' turn off default typing
 Option DEFAULT NONE
@@ -15,9 +20,9 @@ Option DEFAULT NONE
 Option EXPLICIT
 ' turn off blinking LED while running
 SetPin GP25, DOUT
-' Screen = 320*240
+' Screen = 320*320
 Const width = 320
-Const height = 240
+Const height = 320
 Const onerad = 57.2957795131
 Const update = 100
 Colour RGB(WHITE), RGB(BLACK) ' Set the default colours
@@ -115,35 +120,37 @@ Do
   EndIf
 
   Pause updatescr ' wait before doing next screen update
-  If Touch(DOWN) Then
+  cmd$ = Inkey$
+  If cmd$ <> "" Then
 ' save todays date for returning later
     If dayoff = 0 Then cuday = day : cumonth = month : cuyear = year
-    If Touch(X) <110 Then
-      If Touch(Y) <120 Then
+    If Asc(cmd$) = 61 or Asc(cmd$) = 43 Then ' [+]
         bright = bright + 5
         If bright >95 Then bright=100
-      ElseIf Touch(Y) >=120 Then
+		Backlight bright
+    ElseIf Asc(cmd$) = 45 or Asc(cmd$) = 95 Then '[-]
         bright = bright - 5
         If bright <5 Then bright=0
-      EndIf
-      Backlight bright
-    ElseIf Touch(X) >230 Then
-      If Touch(Y) <120 Then
+		Backlight bright
+    ElseIf Asc(cmd$) = 46 or Asc(cmd$) = 62 Then ' [>]
         If dayoff <97 Then day = day+7 Else month = month+1
         If day >28 Then day=1 : month = month+1
         If month >12 Then month=1 : year = year+1
-'        If year > 2100 Then year = 2100
-      ElseIf Touch(Y) >=120 Then
+        If year > 2100 Then year = 2100
+		updatescr=0
+		lastsec=60
+		dayoff = dayoff+3
+		Date$ = Str$(day)+"/"+Str$(month)+"/"+Str$(year)
+    ElseIf Asc(cmd$) = 44 or Asc(cmd$) = 60 Then ' [<]
         If dayoff <97 Then day = day-7 Else month = month-1
         If day <1 Then day=28 : month = month-1
         If month <1 Then month=12 : year = year-1
         If year <1901 Then year=1901
-      EndIf
-      updatescr=0
-      lastsec=60
-      dayoff = dayoff+3
-      Date$ = Str$(day)+"/"+Str$(month)+"/"+Str$(year)
-    ElseIf Touch(X) >110 And Touch(X) <230 Then
+		updatescr=0
+		lastsec=60
+		dayoff = dayoff+3
+		Date$ = Str$(day)+"/"+Str$(month)+"/"+Str$(year)
+    ElseIf Asc(cmd$) = 8 Then '[<-Back]
       updatescr = update
       dayoff = 0
       lastsec=60
