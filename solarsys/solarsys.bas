@@ -7,10 +7,8 @@
 ' changes only include new screen size of 320x320 and replacement of touch interface with keyboard.
 '
 ' Keys:
-' +            = Brightness up
-' -            = Brightness down
-' ,<           = increase date by a week at a time then a month...
-' .>           = decrease date by a week at a time then a month...
+' +            = increase date by a week at a time then a month...
+' -            = decrease date by a week at a time then a month...
 ' <-Back       = reset back to todays date, also re-initialise LCD display
 ' ESC          = Exit program
 '
@@ -18,8 +16,6 @@
 Option DEFAULT NONE
 ' force explicit typing
 Option EXPLICIT
-' turn off blinking LED while running
-SetPin GP25, DOUT
 ' Screen = 320*320
 Const width = 320
 Const height = 320
@@ -33,16 +29,16 @@ Dim STRING dy
 Dim INTEGER x, y, orbit, year, month, day, hour, min, today = 0, bright = 28
 Dim INTEGER dayoff = 0, cuday, cumonth, cuyear, updatescr = update
 Dim INTEGER last_pos(1,9)
-Dim INTEGER rtcl=1 ' do we have a hardware real time clock
+Dim INTEGER rtcl=0 ' do we have a hardware real time clock
 Dim FLOAT planets_dict(1,9)
 Dim FLOAT xeclip, yeclip, zeclip, long2, lat2, r, Earthx, Earthy
 Dim FLOAT feta, coordinatex, coordinatey, seconds, lastsec=60.0, frac_s=0.0
-
+Dim cmd$
 ' set screen backlight to mid value
 Backlight bright
 ' Solar system centre
 y = height / 2
-x = y
+x = 120
 
 Do
   day = Eval(Left$(Date$, 2))
@@ -109,7 +105,7 @@ Do
 ' display current time and Pluto unless fast scrolling date
   If dayoff <= 2 Then
     seconds = Eval(Right$(Time$, 2))
-    If lastsec > seconds Then Text 204, 212, Left$(Time$, 5), "LT", 7, 4, RGB(CYAN) : seconds=0 ' update time
+    If lastsec > seconds Then Text 204, 280, Left$(Time$, 5), "LT", 7, 4, RGB(CYAN) : seconds=0 ' update time
     If seconds <> lastsec Then
       frac_s=0
       lastsec = seconds
@@ -125,14 +121,6 @@ Do
 ' save todays date for returning later
     If dayoff = 0 Then cuday = day : cumonth = month : cuyear = year
     If Asc(cmd$) = 61 or Asc(cmd$) = 43 Then ' [+]
-        bright = bright + 5
-        If bright >95 Then bright=100
-		Backlight bright
-    ElseIf Asc(cmd$) = 45 or Asc(cmd$) = 95 Then '[-]
-        bright = bright - 5
-        If bright <5 Then bright=0
-		Backlight bright
-    ElseIf Asc(cmd$) = 46 or Asc(cmd$) = 62 Then ' [>]
         If dayoff <97 Then day = day+7 Else month = month+1
         If day >28 Then day=1 : month = month+1
         If month >12 Then month=1 : year = year+1
@@ -141,7 +129,7 @@ Do
 		lastsec=60
 		dayoff = dayoff+3
 		Date$ = Str$(day)+"/"+Str$(month)+"/"+Str$(year)
-    ElseIf Asc(cmd$) = 44 or Asc(cmd$) = 60 Then ' [<]
+    ElseIf Asc(cmd$) = 45 or Asc(cmd$) = 95 Then '[-]
         If dayoff <97 Then day = day-7 Else month = month-1
         If day <1 Then day=28 : month = month-1
         If month <1 Then month=12 : year = year-1
@@ -160,6 +148,8 @@ Do
       Else
         Date$ = Str$(cuday)+"/"+Str$(cumonth)+"/"+Str$(cuyear)
       EndIf
+    ElseIf Asc(cmd$) = 27 Then 'ESC
+        Exit Do	  
     EndIf
   ElseIf dayoff >2 Then
     dayoff = 2
@@ -175,7 +165,7 @@ Const  BOUNCE = -0.98
 Static Float  plu_x = 290.0, plu_y = y
 Static Float  xpos = plu_x, ypos=plu_y
 Static Float  vel_x = -3.0
-Static Integer  y_height = 124, y_min = 83
+Static Integer  y_height = 124, y_min = 113
 Static Integer  x_min = width-82 + R, x_max = width - R
 Static Float amplitude, x_fun, sway, height, sec2
 
@@ -184,13 +174,13 @@ Static Float amplitude, x_fun, sway, height, sec2
      vel_x = Rnd*3+4
      If Rnd > 0.5 Then vel_x = -(vel_x)
 ' update 59sec and 0 sec markers every minute.
-     Text 236, 83, "0", "LB", 7, 1, RGB(156,166,183)
-     Text 226, 210, "59", "LB", 7, 1, RGB(156,166,183)
+     Text 236, 113, "0", "LB", 7, 1, RGB(156,166,183)
+     Text 226, 250, "59", "LB", 7, 1, RGB(156,166,183)
    EndIf
 ' update the 30sec marker every 4 seconds while less than 35 seconds
-   If secs >= sec2 And secs <= 35 Then sec2 = secs+2 : Text 308, 150, "30", "LB", 7, 1, RGB(156,166,183)
+   If secs >= sec2 And secs <= 35 Then sec2 = secs+2 : Text 308, 170, "30", "LB", 7, 1, RGB(156,166,183)
 
-   amplitude = (60-secs)/60
+   amplitude = (60-secs)/120
    x_fun = secs - Fix( secs )
    sway = 1 - ((((x_fun/0.5)-1)^2) * (-1) + 1)
    height = y_height * amplitude
