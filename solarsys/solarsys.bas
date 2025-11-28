@@ -2,7 +2,7 @@
 ' Based on Python project https://github.com/dr-mod/pico-solar-system
 ' which uses the planetry equations of motion from http://stjarnhimlen.se/comp/tutorial.html
 ' I have limited the year between 1901 and 2100 as the equations may not work beyond these.
-' 
+'
 ' modified from its original form to work on the picocalc
 ' changes only include new screen size of 320x320 and replacement of touch interface with keyboard.
 '
@@ -115,24 +115,24 @@ Do
   If cmd$ <> "" Then
 ' save todays date for returning later
     If dayoff = 0 Then cuday = day : cumonth = month : cuyear = year
-    If Asc(cmd$) = 61 or Asc(cmd$) = 43 Then ' [+]
+    If Asc(cmd$) = 61 Or Asc(cmd$) = 43 Then ' [+]
         If dayoff <97 Then day = day+7 Else month = month+1
         If day >28 Then day=1 : month = month+1
         If month >12 Then month=1 : year = year+1
         If year > 2100 Then year = 2100
-		updatescr=0
-		lastsec=60
-		dayoff = dayoff+3
-		Date$ = Str$(day)+"/"+Str$(month)+"/"+Str$(year)
-    ElseIf Asc(cmd$) = 45 or Asc(cmd$) = 95 Then '[-]
+        updatescr=0
+        lastsec=60
+        dayoff = dayoff+3
+        Date$ = Str$(day)+"/"+Str$(month)+"/"+Str$(year)
+    ElseIf Asc(cmd$) = 45 Or Asc(cmd$) = 95 Then '[-]
         If dayoff <97 Then day = day-7 Else month = month-1
         If day <1 Then day=28 : month = month-1
         If month <1 Then month=12 : year = year-1
         If year <1901 Then year=1901
-		updatescr=0
-		lastsec=60
-		dayoff = dayoff+3
-		Date$ = Str$(day)+"/"+Str$(month)+"/"+Str$(year)
+        updatescr=0
+        lastsec=60
+        dayoff = dayoff+3
+        Date$ = Str$(day)+"/"+Str$(month)+"/"+Str$(year)
     ElseIf Asc(cmd$) = 8 Then '[<-Back]
       updatescr = update
       dayoff = 0
@@ -144,7 +144,7 @@ Do
         Date$ = Str$(cuday)+"/"+Str$(cumonth)+"/"+Str$(cuyear)
       EndIf
     ElseIf Asc(cmd$) = 27 Then 'ESC
-        Exit Do	  
+        Exit Do
     EndIf
   ElseIf dayoff >2 Then
     dayoff = 2
@@ -155,13 +155,13 @@ Do
 Loop
 
 Sub Pluto( secs As FLOAT )
-Const  R = 4
+Const R = 4
 Const  BOUNCE = -0.98
 Static Float  plu_x = 290.0, plu_y = y
 Static Float  xpos = plu_x, ypos=plu_y
 Static Float  vel_x = -3.0
-Static Integer  y_height = 124, y_min = 113
-Static Integer  x_min = width-82 + R, x_max = width - R
+Static Integer  y_height = 124, y_min = 140
+Static Integer  x_min = width-76, x_max = width - 18
 Static Float amplitude, x_fun, sway, height, sec2
 
    If secs < 0.01 Then
@@ -169,11 +169,11 @@ Static Float amplitude, x_fun, sway, height, sec2
      vel_x = Rnd*3+4
      If Rnd > 0.5 Then vel_x = -(vel_x)
 ' update 59sec and 0 sec markers every minute.
-     Text 236, 113, "0", "LB", 7, 1, RGB(156,166,183)
-     Text 226, 250, "59", "LB", 7, 1, RGB(156,166,183)
+     Text 236, 200, "0", "LB", 7, 1, RGB(156,166,183)
+     Text 226, 270, "59", "LB", 7, 1, RGB(156,166,183)
    EndIf
 ' update the 30sec marker every 4 seconds while less than 35 seconds
-   If secs >= sec2 And secs <= 35 Then sec2 = secs+2 : Text 308, 170, "30", "LB", 7, 1, RGB(156,166,183)
+   If secs >= sec2 And secs <= 35 Then sec2 = secs+2 : Text 309, 235, "30", "LB", 7, 1, RGB(156,166,183)
 
    amplitude = (60-secs)/120
    x_fun = secs - Fix( secs )
