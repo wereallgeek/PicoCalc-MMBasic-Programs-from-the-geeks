@@ -12,16 +12,12 @@
 ' <-Back       = reset back to todays date, also re-initialise LCD display
 ' ESC          = Exit program
 '
-' turn off default typing
-Option DEFAULT NONE
-' force explicit typing
-Option EXPLICIT
 ' Screen = 320*320
 Const width = 320
 Const height = 320
 Const onerad = 57.2957795131
 Const update = 100
-Colour RGB(WHITE), RGB(BLACK) ' Set the default colours
+
 Font 1, 3 ' Set the default font
 Dim m$(11) = ("Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec")
 Dim planet_name$(9) = ("","Mercury","Venus","Earth","Mars","Jupiter","Saturn","Uranus","Neptune","Moon")
@@ -34,8 +30,7 @@ Dim FLOAT planets_dict(1,9)
 Dim FLOAT xeclip, yeclip, zeclip, long2, lat2, r, Earthx, Earthy
 Dim FLOAT feta, coordinatex, coordinatey, seconds, lastsec=60.0, frac_s=0.0
 Dim cmd$
-' set screen backlight to mid value
-Backlight bright
+
 ' Solar system centre
 y = height / 2
 x = 120
